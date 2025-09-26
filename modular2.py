@@ -242,7 +242,7 @@ def potencia_mod_p(base:int, exp:int, p:int) -> int:
     """
 
     if exp < 0:
-        raise ValueError("exponente negativo")     # Solo admite exp >= 0
+        raise e.IncopatibleEcuationError("exponente negativo")     # Solo admite exp >= 0
     
     if p == 1:
         return 0                                   # Toda potencia es congruente a 0 (mod 1)
@@ -288,7 +288,7 @@ def inversa_mod_p(n:int, p:int) -> int:
 
     mcd_n_p, x_o, y_0 = bezout(n, p)    # Realizamos bezout 
     if mcd_n_p != 1:                    # Por definición
-        raise ValueError("no hay inversa")
+        raise e.NOPError("no hay inversa")
     return mod(x_o, p)
 
 '-------------------------------------------------------------------------------------------------------------------------------------'

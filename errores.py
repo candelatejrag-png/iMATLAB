@@ -4,3 +4,6 @@ class NEError:
 
 class NOPError: 
     pass
+
+class IncopatibleEcuationError: 
+    pass
