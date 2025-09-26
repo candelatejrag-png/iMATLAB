@@ -4,3 +4,5 @@ class NEError:
 
 class NOPError: 
     pass
+
+print('hola')
