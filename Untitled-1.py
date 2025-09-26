@@ -1,0 +1,1 @@
+print("mcd(a,b)".split('('))
