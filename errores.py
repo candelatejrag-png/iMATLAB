@@ -6,3 +6,5 @@ class NOPError:
     pass
 
 print('hola')
+print("beb")
+print("foe")
