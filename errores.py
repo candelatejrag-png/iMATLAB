@@ -1,4 +1,5 @@
-# Creamos una excepción 
+# Creamos las excepciones necesarias:
+
 class NEError: 
     pass
 
