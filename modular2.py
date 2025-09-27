@@ -245,9 +245,9 @@ def potencia_mod_p(base:int, exp:int, p:int) -> int:
         raise e.IncopatibleEcuationError("exponente negativo")     # Solo admite exp >= 0
     
     if p == 1:
-        return 0                                   # Toda potencia es congruente a 0 (mod 1)
+        return 0                                                   # Toda potencia es congruente a 0 (mod 1)
     
-    base %= p                                      # Normaliza base al rango [0, p - 1] 
+    base %= p                                                      # Normaliza base al rango [0, p - 1] 
     
 
     """

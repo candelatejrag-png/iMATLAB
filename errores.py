@@ -1,10 +1,10 @@
 # Creamos las excepciones necesarias:
 
-class NEError: 
+class NEError(Exception): 
     pass
 
-class NOPError: 
+class NOPError(Exception): 
     pass
 
-class IncopatibleEcuationError: 
+class IncopatibleEcuationError(Exception): 
     pass
