@@ -15,7 +15,7 @@ def mod(a:int, m:int) -> int:
     """
     # !!!!!!!!! CAMBIADO EL COMMENT MIRALO
     if m <= 0:
-        raise ValueError("m debe ser > 0")
+        raise e.NOPError("m debe ser > 0")
     return a % m
 
 # !!!!!!!! ESTAS LUEGO LAS USAREMOS PARA LAS OPCIONALES
@@ -25,10 +25,10 @@ def tcr_dos(r1:int, m1:int, r2:int, m2:int) -> tuple[int, int]:
 
     """
     if m1 == 0 or m2 == 0:
-        raise ValueError("modulo cero")     # no dividir por 0
+        raise e.NEError("modulo cero")     # no dividir por 0
     g, s, _ = bezout(m1, m2)                # g = mcd(m1, m2) y coeficientes de bezout
     if (r2 - r1) % g != 0:
-        raise ValueError("incompatible")    # el sistema solo tiene solucion si g divide r2 - r1
+        raise e.NEError("incompatible")    # el sistema solo tiene solucion si g divide r2 - r1
     lcm = m1 // g * m2  
     k = ((r2 - r1) // g) * s
     res = (r1 + m1 * k) % lcm
@@ -41,7 +41,7 @@ def resolver_lineal(a:int, b:int, m:int) -> tuple[int, int]:
     """
     g, s, _ = bezout(a, m)
     if b % g != 0:
-        raise ValueError("sin solucion")
+        raise e.NEError("sin solucion")
     a1, b1, m1 = a // g, b // g, m // g
     r = mod(s * b1, m1)
     return r, m1
@@ -190,7 +190,7 @@ def bezout(a:int, b:int) -> tuple[int, int, int]:
         x, y: punto del plano que satisface la ecuación a*x_o + b*y_o = r_antes
     """
 
-    r_antes, r = abs(max(a,b)), abs(min(a,b))   # Por eficiencia tomamos los valores absolutos de a y b dejando el mayor de ellos a
+    r_antes, r = a, b                           # Por eficiencia tomamos los valores absolutos de a y b dejando el mayor de ellos a
                                                 # la izquierda
     s_antes, s = 1, 0                           # |a| = 1*|a| + 0*|b|
     t_antes, t = 0, 1                           # |b| = 0*|a| + 1*|b|
@@ -240,10 +240,12 @@ def potencia_mod_p(base:int, exp:int, p:int) -> int:
     Returns:
         result (int): el resultado de la operación
     """
-
+    if base < 0: 
+        base = p + base
     if exp < 0:
-        raise e.IncopatibleEcuationError("exponente negativo")     # Solo admite exp >= 0
-    
+        base = inversa_mod_p(base,p)
+        exp = abs(exp)
+
     if p == 1:
         return 0                                                   # Toda potencia es congruente a 0 (mod 1)
     
@@ -285,10 +287,11 @@ def inversa_mod_p(n:int, p:int) -> int:
     Returns:
         (int): el resultado del inverso de n módulo p
     """
-
+    if n < 0: 
+        n = p + n
     mcd_n_p, x_o, y_0 = bezout(n, p)    # Realizamos bezout 
     if mcd_n_p != 1:                    # Por definición
-        raise e.NOPError("no hay inversa")
+        raise e.NEError("no hay inversa")
     return mod(x_o, p)
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
@@ -326,7 +329,7 @@ def legendre(n:int, p:int) -> int:
     """
 
     if p <= 2 or not es_primo(p):
-        raise ValueError("p debe ser primo impar")
+        raise e.NOPError("p debe ser primo impar")
     n_mod = n % p                               # n|p
     if n_mod == 0:
         return 0
@@ -337,7 +340,7 @@ def legendre(n:int, p:int) -> int:
 
 # Apartado 11
 
-def resolver_sistema_congruencias(alist, blist, plist):
+def resolver_sistema_congruencias(alist: list, blist: list, plist: list)-> tuple:
     """
     Resuelve el sistema aix congruente a bi (mod pi)
     Acepta modulos no coprimos, lanza ValueError si no hay solucion
@@ -349,7 +352,7 @@ def resolver_sistema_congruencias(alist, blist, plist):
         raise ValueError("entrada vacia o inconsistente")
     
     # primera ecuacion
-    r, mod = resolver_lineal(alist[0], blist[0], plist[0])
+    r, modul = resolver_lineal(alist[0], blist[0], plist[0])
 
     i = 1
     while i < n:
@@ -357,10 +360,10 @@ def resolver_sistema_congruencias(alist, blist, plist):
         b = blist[i]
         p = plist[i]
         r2, m2 = resolver_lineal(a, b, p)     # reduce a clase unica
-        r, mod = tcr_dos(r, mod, r2, m2)      # fusiona ambas clases
+        r, modul = tcr_dos(r, modul, r2, m2)      # fusiona ambas clases
         i += 1
 
-        return mod(r, mod), mod               # se devuelve r reducido al rango [0, m - 1] y el modulo m
+        return mod(r, modul), modul               # se devuelve r reducido al rango [0, m - 1] y el modulo m
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
 
