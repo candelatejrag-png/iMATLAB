@@ -7,8 +7,3 @@ lista_argus = list(map(list, zip(*(map(int,num) for num in match_r_sist))))
 print(lista_argus)
 
 
-# l = zip((map(int,num)) for num in match_r_sist)
-# print(list(l))
-
-# j = map(int, ['1','2','3'])
-# print(('hola',list(j)))
