@@ -91,7 +91,6 @@ def lista_primos(a:int, b:int) -> list[int]:
     Returns: 
         res (list[int]): lista de primos del intervalo
     """
-
     result = []
     if a >= b:
         return result                   # Si a >= b, devuelve [] vacio
@@ -340,13 +339,12 @@ def legendre(n:int, p:int) -> int:
 
 # Apartado 11
 
-def resolver_sistema_congruencias(alist: list, blist: list, plist: list)-> tuple:
+def resolver_sistema_congruencias(alist: list[int], blist: list[int], plist: list[int])-> tuple:
     """
     Resuelve el sistema aix congruente a bi (mod pi)
     Acepta modulos no coprimos, lanza ValueError si no hay solucion
     Devuelve (r, m) con x congruente de r (mod m)
     """
-
     n = len(alist)
     if n == 0 or n != len(blist) or n != len(plist):
         raise ValueError("entrada vacia o inconsistente")

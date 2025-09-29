@@ -37,11 +37,20 @@ def clean_command(comando_sucio: str, dic_comandos: dict) -> tuple:
     comando = match.group(1)
     if comando not in dic_comandos:                                            # Si el comando no esta en el diccionario no forma parte de nuestra librería, lanzamos una excepción. 
         raise e.NOPError(f'El comando {comando} no exsite. ')
-    
-    lista_argumentos = re.findall(r"-?\d+", match.group(2))                    # Empleamos el método findall. 
-    if len(lista_argumentos) != dic_comandos[comando][1]:                      # Si esta lista no tiene los números necesarios para la operación se lanza una excepción. 
-        raise e.NOPError(f'El comando {comando} no se puede realizar con los argumentos dados. Se han introducido {len(lista_argumentos)} válidos cuándo se necesitaban {dic_comandos[comando][1]}. ')
-    comando_limpio = (dic_comandos[comando][0], map(int, lista_argumentos))    # creamos la tupla solución convirtiendo los argumentos en enteros empleando map(int, args)
+    comando_nuevo = dic_comandos[comando][0]
+    if comando_nuevo == f.resolver_sistema_congruencias: 
+        longitud = len(match.group(2).split(','))
+        match_r_sist = re.findall(r"\[(-?\d+);(-?\d+);(-?\d+)\]", match.group(2))
+        lista_argumentos = list(map(list, zip(*(map(int,num) for num in match_r_sist))))
+        if match_r_sist == [] or longitud != len(lista_argumentos[0]): 
+            raise e.NOPError(f'El comando {comando} no se puede realizar con los argumentos dados. ')
+
+    else:
+        lista_argumentos = re.findall(r"-?\d+", match.group(2))                    # Empleamos el método findall. 
+        if len(lista_argumentos) != dic_comandos[comando][1]:                      # Si esta lista no tiene los números necesarios para la operación se lanza una excepción. 
+            raise e.NOPError(f'El comando {comando} no se puede realizar con los argumentos dados. Se han introducido {len(lista_argumentos)} válidos cuándo se necesitaban {dic_comandos[comando][1]}. ')
+        lista_argumentos = map(int, lista_argumentos)
+    comando_limpio = (comando_nuevo, lista_argumentos)    # creamos la tupla solución convirtiendo los argumentos en enteros empleando map(int, args)
     return comando_limpio 
 
 
@@ -49,7 +58,7 @@ def run_program(comando_sucio, user=True):
 
     # Creamos un diccionario donde la clave es la función que pide el usuario y su valor asociado es una lista formada por la función de modular.py asociada al comando y el número 
     # de argumentos que recibe la función.  
-    dic_comandos = {'primo':[ f.es_primo, 1],'primos': [f.lista_primos, 2], 'factorizar': [f.factorizar, 1], 'mcd': [f.mcd, 2], 'coprimos': [f.coprimos, 2], 'pow': [f.potencia_mod_p, 3], 'inv': [f.inversa_mod_p, 2], 'euler': [f.euler, 1], 'legendre': [f.legendre, 2], 'resolversistema': [f.resolver_sistema_congruencias, 3]}
+    dic_comandos = {'primo':[ f.es_primo, 1],'primos': [f.lista_primos, 2], 'factorizar': [f.factorizar, 1], 'mcd': [f.mcd, 2], 'coprimos': [f.coprimos, 2], 'pow': [f.potencia_mod_p, 3], 'inv': [f.inversa_mod_p, 2], 'euler': [f.euler, 1], 'legendre': [f.legendre, 2], 'resolverSistema': [f.resolver_sistema_congruencias, None]}
 
     try:
         funcion, args = clean_command(comando_sucio, dic_comandos)
