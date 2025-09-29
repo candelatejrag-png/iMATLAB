@@ -12,8 +12,8 @@ Integrantes:
 Descripción:
 Sistema interactivo IMAT-LAB de resolución de ecuaciones en aritmética modular.
 
-Interfaz de acceso interactivo o por lotes a la librería modular.py. Si este script se ejecuta sin par´ametros,
-lanzar´a la interfaz de usuario para el modo interactivo.
+Interfaz de acceso interactivo o por lotes a la librería modular.py. Si este script se ejecuta sin parámetros,
+lanzaría la interfaz de usuario para el modo interactivo.
 """
 
 # Importamos las librerías necesarias:
@@ -21,7 +21,7 @@ from typing import TextIO
 import sys
 
 # importamos los scripts necesarios: 
-import modular2 as f
+import modular as f
 import errores as e
 import re 
 
@@ -56,7 +56,7 @@ def clean_command(comando_sucio: str, dic_comandos: dict) -> tuple:
     comando = match.group(1)
     if comando not in dic_comandos:                                            # Si el comando no esta en el diccionario no forma parte de nuestra librería, lanzamos una excepción. 
         raise e.NOPError(f'El comando {comando} no exsite. ')
-    comando_nuevo = dic_comandos[comando][0]
+    comando_nuevo, llamar_comando = dic_comandos[comando][0], dic_comandos[comando][2]
     if comando_nuevo == f.resolver_sistema_congruencias: 
         longitud = len(match.group(2).split(','))
         match_r_sist = re.findall(r"\[(-?\d+);(-?\d+);(-?\d+)\]", match.group(2))
@@ -69,28 +69,43 @@ def clean_command(comando_sucio: str, dic_comandos: dict) -> tuple:
         if len(lista_argumentos) != dic_comandos[comando][1]:                      # Si esta lista no tiene los números necesarios para la operación se lanza una excepción. 
             raise e.NOPError(f'El comando {comando} no se puede realizar con los argumentos dados. Se han introducido {len(lista_argumentos)} válidos cuándo se necesitaban {dic_comandos[comando][1]}. ')
         lista_argumentos = map(int, lista_argumentos)
-    comando_limpio = (comando_nuevo, lista_argumentos)    # creamos la tupla solución convirtiendo los argumentos en enteros empleando map(int, args)
+    comando_limpio = (comando_nuevo, llamar_comando, lista_argumentos)    # creamos la tupla solución convirtiendo los argumentos en enteros empleando map(int, args)
     return comando_limpio 
 
+def run_bool(funcion, args): 
+    result = funcion(*args)
+    return 'Sí' if result else 'No'
+
+def run_lprimos(funcion, args): 
+    result = funcion(*args)
+    return str(result)[1:-1] if len(result) != 0 else 'NE'
+
+def run_factors(funcion, args): 
+    result = funcion(*args)
+    return str(result)[1:-1] if len(result) != 0 else 0
+
+def run_mcd(funcion, args): 
+    return funcion(*args)
+
+def run_mod_p(funcion, args): 
+    try: 
+        return funcion(*args)
+    except ZeroDivisionError as error: 
+        return 'NE'
+    except e.NOPError as error: 
+        return error
+    
 
 def run_program(comando_sucio, user=True):
 
     # Creamos un diccionario donde la clave es la función que pide el usuario y su valor asociado es una lista formada por la función de modular.py asociada al comando y el número 
     # de argumentos que recibe la función.  
-    dic_comandos = {'primo':[ f.es_primo, 1],'primos': [f.lista_primos, 2], 'factorizar': [f.factorizar, 1], 'mcd': [f.mcd, 2], 'coprimos': [f.coprimos, 2], 'pow': [f.potencia_mod_p, 3], 'inv': [f.inversa_mod_p, 2], 'euler': [f.euler, 1], 'legendre': [f.legendre, 2], 'resolverSistema': [f.resolver_sistema_congruencias, None]}
+    dic_comandos = {'primo':[ f.es_primo, 1, run_bool],'primos': [f.lista_primos, 2, run_lprimos], 'factorizar': [f.factorizar, 1, run_factors], 'mcd': [f.mcd, 2, run_mcd], 'coprimos': [f.coprimos, 2, run_bool], 'pow': [f.potencia_mod_p, 3, run_mod_p], 'inv': [f.inversa_mod_p, 2, run_mod_p], 'euler': [f.euler, 1], 'legendre': [f.legendre, 2, run_mod_p], 'resolverSistema': [f.resolver_sistema_congruencias, None]}
 
     try:
-        funcion, args = clean_command(comando_sucio, dic_comandos)
-        result = funcion(*args)           # Llamamos a la función, empleando '*' le pasamos cada elemento de la lista a cada argumento. 
-        if type(result) == bool: 
-            return 'Sí' if result else 'No'
-        elif type(result) == int: 
-            return result
-        elif funcion == f.resolver_sistema_congruencias: 
-            return f'{result[0]} (mod {result[1]})'
-        else: 
-            return str(result)[1:-1]
-        
+        funcion, llamar_fun, args = clean_command(comando_sucio, dic_comandos)
+        result = llamar_fun(funcion, args)           # Llamamos a la función, empleando '*' le pasamos cada elemento de la lista a cada argumento. 
+        return result
     except e.NOPError as error: 
         return error if user else 'NOP'    # Si el ususario ya pedido el comando devuelve el error si el programa está en modo interactivo devolvemos None.
     except e.NEError as error: 
