@@ -248,7 +248,8 @@ def potencia_mod_p(base:int, exp:int, p:int) -> int:
     Returns:
         result (int): el resultado de la operación
     """
-
+    if p == 0 or base == 0 or exp == 0: 
+        raise ZeroDivisionError('No se puede dividir por 0. ')
     if base < 0: 
         base = p + base
     if exp < 0: 
@@ -297,7 +298,7 @@ def inversa_mod_p(n:int, p:int) -> int:
         (int): inverso de n modulo p en el rango [0, p-1] !!!!!!!!!!!!! por queeee ese rango
     """
     if p <= 1:
-        raise ValueError("p debe ser un entero > 1") # siii!!! por queee
+        raise e.NEError("p debe ser un entero > 1") # siii!!! por queee
     mcd_n_p, x_o, y_0 = bezout(n, p)    # Hacemos bezout 
     if mcd_n_p != 1:                    # Por definición
         raise ZeroDivisionError(f"No existe inversa: mcd({n}, {p}) = {mcd_n_p} != 1")

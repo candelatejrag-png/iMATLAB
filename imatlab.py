@@ -93,7 +93,7 @@ def run_mod_p(funcion, args):
     except ZeroDivisionError as error: 
         return 'NE'
     except e.NOPError as error: 
-        return error
+        return 'NE'
     
 def run_resSist(funcion, args): 
     result = funcion(*args)
