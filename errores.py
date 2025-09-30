@@ -1,10 +1,10 @@
-# Creamos una excepción 
-class NEError: 
+# Creamos las excepciones necesarias:
+
+class NEError(Exception): 
     pass
 
-class NOPError: 
+class NOPError(Exception): 
     pass
 
-print('hola')
-print("beb")
-print("foe")
+class IncopatibleEcuationError(Exception): 
+    pass
