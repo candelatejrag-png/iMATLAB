@@ -1,29 +1,6 @@
 # importamos los scripts necesarios: 
 import errores as e
 
-# Creamos las funciones auxiliares necesarias: 
-
-def mod(a:int, m:int) -> int:
-    """
-    Función que calcula el módulo entre dos números.
-
-    Args: 
-        a (int): primer número
-        m (int): segundo número
-    Returns: 
-        (int): si m es > 0 devuelve el resto de la division entera
-    """
-    # !!!!!!!!! CAMBIADO EL COMMENT MIRALO
-    if m <= 0:
-        raise ValueError("m debe ser > 0")
-    return a % m
-
-
-
-
-
-
-
 #  COMENZAMOS LA PRÁCTICA:
 
 # Apartado 1
@@ -184,6 +161,61 @@ def bezout(a:int, b:int) -> tuple[int, int, int]:
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
 
+# Apartado 5
+
+def mcd_n(nlist:list[int]) -> int:
+    """
+    Máximo común divisor de una lista de enteros.
+    - Lista vacía -> ValueError.
+    - Todos ceros -> 0.
+    1. reduce con Euclides
+    2. Si en algun punto g = 1, termina (atajo)
+    """
+    if not nlist:
+        raise ValueError("lista vacía")
+    g = 0
+    for a in nlist:
+        g = mcd(g, a)
+        if g == 1:            # atajo: no puede bajar de 1
+            return 1
+    return g
+
+def bezout_n(nlist:list[int]) -> tuple[int, list[int]]:
+    """
+    Devuelve coeficientes de Bézout para n enteros.
+    Devuelve (d, coefs) con d = mcd(nlist) y sum(a_i*coefs[i]) = d.
+    - Lista vacía -> ValueError.
+    - Todos ceros -> (0, [0,...,0]).
+    """
+    if not nlist:
+        raise ValueError("lista vacía")
+    n = len(nlist)
+    if all(a == 0 for a in nlist):
+        return 0, [0]*n
+
+    # Inicializa con el primer término: d = |a1| = a1*(±1)
+    d = abs(nlist[0])
+    coefs = [0]*n
+    coefs[0] = 1 if nlist[0] >= 0 else -1
+
+    # Incorpora uno a uno usando Bézout: s*d + t*a = g
+    for i in range(1, n):
+        a = nlist[i]
+        g, s, t = bezout(d, a)
+        # Escala los coeficientes existentes por s
+        for j in range(i):
+            coefs[j] *= s
+        # Nuevo coeficiente para a_i
+        coefs[i] = t
+        d = g
+        if d == 1:            # atajo si ya son coprimos
+            return 1, coefs
+
+    return d, coefs
+
+
+'-------------------------------------------------------------------------------------------------------------------------------------'
+
 # Apartado 6
 
 def coprimos(a:int, b:int) -> bool:
@@ -320,7 +352,23 @@ def legendre(n:int, p:int) -> int:
 
 # Apartado 11 & 12
 
-# !!!!!!!! ESTAS LUEGO LAS USAREMOS PARA LAS OPCIONALES
+def mod(a:int, m:int) -> int:
+    """
+    Función que calcula el módulo entre dos números.
+
+    Args: 
+        a (int): primer número
+        m (int): segundo número
+    Returns: 
+        (int): si m es > 0 devuelve el resto de la division entera
+    """
+    # !!!!!!!!! CAMBIADO EL COMMENT MIRALO
+    if m <= 0:
+        raise ValueError("m debe ser > 0")
+    return a % m
+
+
+
 def tcr_dos(r1:int, m1:int, r2:int, m2:int) -> tuple[int, int]:
     """
     Resuelve un sistema de dos congruencias usando el Teorema Chino del Resto
@@ -329,7 +377,9 @@ def tcr_dos(r1:int, m1:int, r2:int, m2:int) -> tuple[int, int]:
 
     """
     if m1 == 0 or m2 == 0:
-        raise ZeroDivisionError("modulo cero")     # no dividir por 0
+        raise ValueError("modulo cero")     # no dividir por 0
+    if m1 < 0 or m2 < 0:
+        raise ValueError("modulo negativo")
     g, s, _ = bezout(m1, m2)                # g = mcd(m1, m2) y coeficientes de bezout
     if (r2 - r1) % g != 0:
         raise ValueError("incompatible")    # el sistema solo tiene solucion si g divide r2 - r1
@@ -345,13 +395,16 @@ def resolver_lineal(a:int, b:int, m:int) -> tuple[int, int]:
     Lanza ValueError si no hay solucion
     """
     if m == 0:
-        raise ZeroDivisionError("modulo cero")
+        raise ValueError("modulo cero")
+    if m < 0:
+        raise ValueError("modulo negativo")
     g, s, _ = bezout(a, m)
     if b % g != 0:
         raise ValueError("sin solucion")
     a1, b1, m1 = a // g, b // g, m // g
     r = mod(s * b1, m1)
     return r, m1
+
 def resolver_sistema_congruencias(alist, blist, plist):
     """
     Resuelve el sistema aix congruente a bi (mod pi)
@@ -362,7 +415,6 @@ def resolver_sistema_congruencias(alist, blist, plist):
     n = len(alist)
     if n == 0 or n != len(blist) or n != len(plist):
         raise ValueError("entrada vacia o inconsistente")
-    
     
     # primera ecuacion
     r, mod = resolver_lineal(alist[0], blist[0], plist[0])
