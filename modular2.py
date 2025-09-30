@@ -317,7 +317,6 @@ def legendre(n:int, p:int) -> int:
 
 # Apartado 11 & 12
 
-# !!!!!!!! ESTAS LUEGO LAS USAREMOS PARA LAS OPCIONALES
 def tcr_dos(r1:int, m1:int, r2:int, m2:int) -> tuple[int, int]:
     """
     Resuelve un sistema de dos congruencias usando el Teorema Chino del Resto
@@ -387,6 +386,7 @@ def ec_cuadratica(a:int, b:int, c:int, p:int):
     a %= p
     b %= p
     c %= p
+# hola
 
     if a == 0:
         # bx + c = 0 (mod p)
