@@ -96,15 +96,17 @@ def run_mod_p(funcion, args):
         return 'NE'
     
 def run_resSist(funcion, args): 
-    result = funcion(*args)
-    return 
-    
+    try: 
+        r, m = funcion(*args)
+        return f'{r} (mod {m})'
+    except ValueError as error: 
+        return 'NE'
 
 def run_program(comando_sucio, user=True):
 
     # Creamos un diccionario donde la clave es la función que pide el usuario y su valor asociado es una lista formada por la función de modular.py asociada al comando y el número 
     # de argumentos que recibe la función.  
-    dic_comandos = {'primo':[ f.es_primo, 1, run_bool],'primos': [f.lista_primos, 2, run_lprimos], 'factorizar': [f.factorizar, 1, run_factors], 'mcd': [f.mcd, 2, run_mcd], 'coprimos': [f.coprimos, 2, run_bool], 'pow': [f.potencia_mod_p, 3, run_mod_p], 'inv': [f.inversa_mod_p, 2, run_mod_p], 'euler': [f.euler, 1], 'legendre': [f.legendre, 2, run_mod_p], 'resolverSistema': [f.resolver_sistema_congruencias, None]}
+    dic_comandos = {'primo':[ f.es_primo, 1, run_bool],'primos': [f.lista_primos, 2, run_lprimos], 'factorizar': [f.factorizar, 1, run_factors], 'mcd': [f.mcd, 2, run_mcd], 'coprimos': [f.coprimos, 2, run_bool], 'pow': [f.potencia_mod_p, 3, run_mod_p], 'inv': [f.inversa_mod_p, 2, run_mod_p], 'euler': [f.euler, 1], 'legendre': [f.legendre, 2, run_mod_p], 'resolverSistema': [f.resolver_sistema_congruencias, None, run_resSist]}
 
     funcion, llamar_fun, args = clean_command(comando_sucio, dic_comandos)
     result = llamar_fun(funcion, args)     # Llamamos a la función, empleando '*' le pasamos cada elemento de la lista a cada argumento. 

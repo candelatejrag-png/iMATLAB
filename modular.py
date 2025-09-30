@@ -298,7 +298,7 @@ def inversa_mod_p(n:int, p:int) -> int:
         (int): inverso de n modulo p en el rango [0, p-1] !!!!!!!!!!!!! por queeee ese rango
     """
     if p <= 1:
-        raise e.NEError("p debe ser un entero > 1") # siii!!! por queee
+        raise e.NEError("NE") # siii!!! por queee
     mcd_n_p, x_o, y_0 = bezout(n, p)    # Hacemos bezout 
     if mcd_n_p != 1:                    # Por definición
         raise ZeroDivisionError(f"No existe inversa: mcd({n}, {p}) = {mcd_n_p} != 1")
@@ -418,11 +418,11 @@ def resolver_sistema_congruencias(alist, blist, plist):
         raise ValueError("entrada vacia o inconsistente")
     
     # primera ecuacion
-    r, mod = resolver_lineal(alist[0], blist[0], plist[0])
+    r, modul = resolver_lineal(alist[0], blist[0], plist[0])
 
     for i in range(1, n):
         r2, m2 = resolver_lineal(alist[i], blist[i], plist[i])
-        r, m = tcr_dos(r, m, r2, m2)
+        r, m = tcr_dos(r, modul, r2, m2)
 
 
     return mod(r, m), m               # se devuelve r reducido al rango [0, m - 1] y el modulo m
