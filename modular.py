@@ -297,6 +297,8 @@ def inversa_mod_p(n:int, p:int) -> int:
     Returns:
         (int): inverso de n modulo p en el rango [0, p-1] !!!!!!!!!!!!! por queeee ese rango
     """
+    if p == 0: 
+        raise ZeroDivisionError('No se puede dividir por 0. ')
     if p <= 1:
         raise e.NEError("NE") # siii!!! por queee
     mcd_n_p, x_o, y_0 = bezout(n, p)    # Hacemos bezout 
