@@ -140,8 +140,6 @@ def factorizar(n:int) -> dict[int, int]:
     
     p_divisor = 5             # Primer 6k-1 (con k = 1)
     salto = 2                 # Primer salto sera +2
-    if x == p_divisor: 
-        factors[x] = factors.get(x, 0) + 1
     while p_divisor * p_divisor <= x:
         while x % p_divisor == 0:
             factors[p_divisor] = factors.get(p_divisor, 0) + 1
@@ -149,9 +147,9 @@ def factorizar(n:int) -> dict[int, int]:
         p_divisor += salto
         salto = 6 - salto     # Alterna 2,4 
 
-        if x > 1:
-            factors[x] = factors.get(x, 0) + 1
-    
+    if x > 1:
+        factors[x] = factors.get(x, 0) + 1
+
     return factors
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
