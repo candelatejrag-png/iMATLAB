@@ -18,33 +18,10 @@ def mod(a:int, m:int) -> int:
         raise ValueError("m debe ser > 0")
     return a % m
 
-# !!!!!!!! ESTAS LUEGO LAS USAREMOS PARA LAS OPCIONALES
-def tcr_dos(r1:int, m1:int, r2:int, m2:int) -> tuple[int, int]:
-    """
-    Resuelve un sistema de dos congruencias usando el Teorema Chino del Resto
-
-    """
-    if m1 == 0 or m2 == 0:
-        raise ValueError("modulo cero")     # no dividir por 0
-    g, s, _ = bezout(m1, m2)                # g = mcd(m1, m2) y coeficientes de bezout
-    if (r2 - r1) % g != 0:
-        raise ValueError("incompatible")    # el sistema solo tiene solucion si g divide r2 - r1
-    lcm = m1 // g * m2  
-    k = ((r2 - r1) // g) * s
-    res = (r1 + m1 * k) % lcm
-    return res, lcm
 
 
-def resolver_lineal(a:int, b:int, m:int) -> tuple[int, int]:
-    """
-    
-    """
-    g, s, _ = bezout(a, m)
-    if b % g != 0:
-        raise ValueError("sin solucion")
-    a1, b1, m1 = a // g, b // g, m // g
-    r = mod(s * b1, m1)
-    return r, m1
+
+
 
 
 #  COMENZAMOS LA PRÁCTICA:
@@ -150,8 +127,8 @@ def factorizar(n:int) -> dict[int, int]:
         p_divisor += salto
         salto = 6 - salto     # Alterna 2,4 
 
-        if x > 1:
-            factors[x] = factors.get(x, 0) + 1
+    if x > 1:
+        factors[x] = factors.get(x, 0) + 1
     
     return factors
 
@@ -280,15 +257,18 @@ def inversa_mod_p(n:int, p:int) -> int:
     Inversa de n modulo p, si existe. Lanza ValueError si no existe (g != 1)
 
     Args:
-        n (int): número
-        p (int): módulo del número
+        n (int): entero cuyo inverso modular se busca
+        p (int): módulo (positivo)
     Returns:
-        (int): el resultado del inverso de n módulo p
+        (int): inverso de n modulo p en el rango [0, p-1] !!!!!!!!!!!!! por queeee ese rango
     """
-
-    mcd_n_p, x_o, y_0 = bezout(n, p)    # Realizamos bezout 
+    if p <= 1:
+        raise ValueError("p debe ser un entero > 1") # siii!!! por queee
+    mcd_n_p, x_o, y_0 = bezout(n, p)    # Hacemos bezout 
     if mcd_n_p != 1:                    # Por definición
-        raise ValueError("no hay inversa")
+        raise ValueError(f"No existe inversa: mcd({n}, {p}) = {mcd_n_p} != 1")
+    # x puede ser negativo por lo que normalizamos al representante en [0, p-1] 
+    # comoooo por queee
     return mod(x_o, p)
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
@@ -335,8 +315,40 @@ def legendre(n:int, p:int) -> int:
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
 
-# Apartado 11
+# Apartado 11 & 12
 
+# !!!!!!!! ESTAS LUEGO LAS USAREMOS PARA LAS OPCIONALES
+def tcr_dos(r1:int, m1:int, r2:int, m2:int) -> tuple[int, int]:
+    """
+    Resuelve un sistema de dos congruencias usando el Teorema Chino del Resto
+    Combina x = r1 (mod m1) y x = r2 (mod m2) para modulos no necesariamente coprimos
+    Lanza Value Error si no hay solucion
+
+    """
+    if m1 == 0 or m2 == 0:
+        raise ValueError("modulo cero")     # no dividir por 0
+    g, s, _ = bezout(m1, m2)                # g = mcd(m1, m2) y coeficientes de bezout
+    if (r2 - r1) % g != 0:
+        raise ValueError("incompatible")    # el sistema solo tiene solucion si g divide r2 - r1
+    lcm = m1 // g * m2  
+    k = ((r2 - r1) // g) * s
+    res = (r1 + m1 * k) % lcm
+    return res, lcm
+
+def resolver_lineal(a:int, b:int, m:int) -> tuple[int, int]:
+    """
+    Resuleve a*x = b (mod m)
+    Devuelve (r, mod') con x = r (mod mod')
+    Lanza ValueError si no hay solucion
+    """
+    if m == 0:
+        raise ValueError("modulo cero")
+    g, s, _ = bezout(a, m)
+    if b % g != 0:
+        raise ValueError("sin solucion")
+    a1, b1, m1 = a // g, b // g, m // g
+    r = mod(s * b1, m1)
+    return r, m1
 def resolver_sistema_congruencias(alist, blist, plist):
     """
     Resuelve el sistema aix congruente a bi (mod pi)
@@ -348,25 +360,75 @@ def resolver_sistema_congruencias(alist, blist, plist):
     if n == 0 or n != len(blist) or n != len(plist):
         raise ValueError("entrada vacia o inconsistente")
     
+    
     # primera ecuacion
     r, mod = resolver_lineal(alist[0], blist[0], plist[0])
 
-    i = 1
-    while i < n:
-        a = alist[i]
-        b = blist[i]
-        p = plist[i]
-        r2, m2 = resolver_lineal(a, b, p)     # reduce a clase unica
-        r, mod = tcr_dos(r, mod, r2, m2)      # fusiona ambas clases
-        i += 1
+    for i in range(1, n):
+        r2, m2 = resolver_lineal(alist[i], blist[i], plist[i])
+        r, m = tcr_dos(r, m, r2, m2)
 
-        return mod(r, mod), mod               # se devuelve r reducido al rango [0, m - 1] y el modulo m
+
+    return mod(r, m), m               # se devuelve r reducido al rango [0, m - 1] y el modulo m
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
 
-# Parte opcional
+# 14
+def ec_cuadratica(a:int, b:int, c:int, p:int):
+    """
+    Devuelve las dos raices (posiblemente iguales) de ax^2 + bx + c = 0 (mod p) con p primo
+        - si no hay raices: devuelve None
+        - si hay dos raices: (x1, x2) con x1 < x2
+        - si hay una doble: (x, x)
+    Casos como a = 0 (mod p) se tratan como ecuacion lineal
+    """
+    if p <= 1 or not es_primo(p):
+        raise ValueError("p debe ser primo")
+    a %= p
+    b %= p
+    c %= p
+
+    if a == 0:
+        # bx + c = 0 (mod p)
+        if b == 0:
+            if c == 0:
+                # infinitas soluciones -> por convencion devolvemos (0,0)
+                return (0, 0)
+            else:
+                return None
+        x = (-c * inversa_mod_p(b, p)) % p
+        return (x, x)
+    
+    # discriminante
+    delta = (b*b -4*a*c) % p
+    r = raiz_mod_p
 
 
+12. (Opcional) Expandir la funcionalidad de resolver sistema congruencias y del comando resolverSistema para
+resolver sistemas de ecuaciones donde los m´odulos no son coprimos entre s´ı.
+13. (Opcional) Investigar el algoritmo de Cipolla y programar en “modular.py” una funci´on
+raiz mod p(n : int, p : int) −→ int
+que reciba un entero n y un n´umero primo p y calcule una ra´ız de n m´odulo p, es decir, un entero x tal que
+x
+2 ≡ n (mod p)
+Usando dicha funci´on, agregar a IMAT-LAB un comando
+raiz(n, p)
+que devuelva lo siguiente:
+ Si n tiene dos ra´ıces distintas x1 < x2, las escribe en orden: “x1, x2”
+ Si n tiene una ´unica ra´ız x, escribe “x”
+ Si n no tiene ra´ıces, como con el resto de comandos, escribe “NE” en modo “batch” o un mensaje de error
+adecuado en modo interactivo.
+14. (Opcional) Usando la funci´on anterior, implementar en “modular.py” una funci´on
+ecuacion cuadratica(a : int, b : int, c : int, p : int) −→ T uple[int, int]
+que reciba enteros a, b, c y p, con p n´umero primo, y devuelva las dos soluciones m´odulo p (posiblemente repetidas)
+de la ecuaci´on
+ax2 + bx + c ≡ 0 (mod p)
+Usando dicha funci´on, agregar a IMAT-LAB un comando
+ecCuadratica(a, b, c, p)
+que implemente la funcionalidad anterior y devuelva lo siguiente
+ Si la ecuaci´on tiene dos ra´ıces distintas x1 < x2, las escribe en orden: “x1, x2”
+ Si la ecuaci´on tiene una ´unica ra´ız doble x, escribe “x”
+ Si la ecuaci´on no tiene ra´ıces, como co
 
 
 
