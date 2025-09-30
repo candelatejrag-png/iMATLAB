@@ -1,4 +1,3 @@
-<<<<<<< HEAD:modular2.py
 # importamos los scripts necesarios: 
 import errores as e
 
@@ -218,8 +217,6 @@ def potencia_mod_p(base:int, exp:int, p:int) -> int:
         result (int): el resultado de la operación
     """
 
-    if exp < 0:
-        raise ZeroDivisionError("NE")     # Solo admite exp >= 0
     if base < 0: 
         base = p + base
     if exp < 0: 
