@@ -6,4 +6,3 @@ import re
 # lista_argus = list(map(list, zip(*(map(int,num) for num in match_r_sist))))
 # print(lista_argus)
 
-print(0**9)

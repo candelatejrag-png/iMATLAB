@@ -6,8 +6,8 @@ ICAI, Universidad Pontificia Comillas
 
 Grupo: GPxxx
 Integrantes:
-    - XX
-    - XX
+    - Candela Tejedo Raga
+    - Gabriela Romero Martín
 
 Descripción:
 Sistema interactivo IMAT-LAB de resolución de ecuaciones en aritmética modular.
@@ -50,14 +50,14 @@ def clean_command(comando_sucio: str, dic_comandos: dict) -> tuple:
     pattern = re.compile(r"([a-zA-Z_]+)+\((.*?)\)")
 
     match = re.search(pattern, comando_sucio)
-    if not match:                                                              # Si el comando introducido por el usuario no tiene un formato adecuado lanzamos una excepción.
+    if not match:                                                         # Si el comando introducido por el usuario no tiene un formato adecuado lanzamos una excepción.
         raise e.NOPError('El formato introducido no es el adecuado, introduzca comando(argumentos) para realizar la operación. Recuerde no introducir espacios entre los argumentos.')
     
     comando = match.group(1)
-    if comando not in dic_comandos:                                            # Si el comando no esta en el diccionario no forma parte de nuestra librería, lanzamos una excepción. 
+    if comando not in dic_comandos:                                       # Si el comando no esta en el diccionario no forma parte de nuestra librería, lanzamos una excepción. 
         raise e.NOPError(f'El comando {comando} no exsite. ')
     comando_nuevo, llamar_comando = dic_comandos[comando][0], dic_comandos[comando][2]
-    if comando_nuevo == f.resolver_sistema_congruencias: 
+    if comando_nuevo == f.resolver_sistema_congruencias:                  # Los argumentos de esta función tiene una estructura distinta
         longitud = len(match.group(2).split(','))
         match_r_sist = re.findall(r"\[(-?\d+);(-?\d+);(-?\d+)\]", match.group(2))
         lista_argumentos = list(map(list, zip(*(map(int,num) for num in match_r_sist))))
@@ -65,8 +65,8 @@ def clean_command(comando_sucio: str, dic_comandos: dict) -> tuple:
             raise e.NOPError(f'El comando {comando} no se puede realizar con los argumentos dados. ')
 
     else:
-        lista_argumentos = re.findall(r"-?\d+", match.group(2))                    # Empleamos el método findall. 
-        if len(lista_argumentos) != dic_comandos[comando][1]:                      # Si esta lista no tiene los números necesarios para la operación se lanza una excepción. 
+        lista_argumentos = re.findall(r"-?\d+", match.group(2))           # Empleamos el método findall. 
+        if len(lista_argumentos) != dic_comandos[comando][1]:             # Si esta lista no tiene los números necesarios para la operación se lanza una excepción. 
             raise e.NOPError(f'El comando {comando} no se puede realizar con los argumentos dados. Se han introducido {len(lista_argumentos)} válidos cuándo se necesitaban {dic_comandos[comando][1]}. ')
         lista_argumentos = map(int, lista_argumentos)
     comando_limpio = (comando_nuevo, llamar_comando, lista_argumentos)    # creamos la tupla solución convirtiendo los argumentos en enteros empleando map(int, args)
@@ -104,10 +104,10 @@ def run_program(comando_sucio, user=True):
 
     try:
         funcion, llamar_fun, args = clean_command(comando_sucio, dic_comandos)
-        result = llamar_fun(funcion, args)           # Llamamos a la función, empleando '*' le pasamos cada elemento de la lista a cada argumento. 
+        result = llamar_fun(funcion, args)     # Llamamos a la función, empleando '*' le pasamos cada elemento de la lista a cada argumento. 
         return result
     except e.NOPError as error: 
-        return error if user else 'NOP'    # Si el ususario ya pedido el comando devuelve el error si el programa está en modo interactivo devolvemos None.
+        return error if user else 'NOP'        # Si el ususario ya pedido el comando devuelve el error si el programa está en modo interactivo devolvemos None.
     except e.NEError as error: 
         return error if user else 'NE'
 

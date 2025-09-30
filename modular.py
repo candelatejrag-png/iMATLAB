@@ -1,4 +1,3 @@
-<<<<<<< HEAD:modular2.py
 # importamos los scripts necesarios: 
 import errores as e
 
@@ -250,8 +249,6 @@ def potencia_mod_p(base:int, exp:int, p:int) -> int:
         result (int): el resultado de la operación
     """
 
-    if exp < 0:
-        raise ZeroDivisionError("NE")     # Solo admite exp >= 0
     if base < 0: 
         base = p + base
     if exp < 0: 
@@ -341,7 +338,8 @@ def legendre(n:int, p:int) -> int:
         y devuelve: (base^exp) mod m
     --> la usamos porque es mucho mas eficiente que elevar y luego hacer %    
     """
-
+    if p == 0: 
+        raise ZeroDivisionError('No se puede dividir por 0. ')
     if p <= 2 or not es_primo(p):
         raise ValueError("p debe ser primo impar")
     n_mod = n % p                               # n|p
