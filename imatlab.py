@@ -50,14 +50,14 @@ def clean_command(comando_sucio: str, dic_comandos: dict) -> tuple:
     pattern = re.compile(r"([a-zA-Z_]+)+\((.*?)\)")
 
     match = re.search(pattern, comando_sucio)
-    if not match:                                                         # Si el comando introducido por el usuario no tiene un formato adecuado lanzamos una excepción.
+    if not match:                                                                                                  # Si el comando introducido por el usuario no tiene un formato adecuado lanzamos una excepción.
         raise e.NOPError('El formato introducido no es el adecuado, introduzca comando(argumentos) para realizar la operación. Recuerde no introducir espacios entre los argumentos.')
     
     comando = match.group(1)
-    if comando not in dic_comandos:                                       # Si el comando no esta en el diccionario no forma parte de nuestra librería, lanzamos una excepción. 
+    if comando not in dic_comandos:                                                                                # Si el comando no esta en el diccionario no forma parte de nuestra librería, lanzamos una excepción. 
         raise e.NOPError(f'El comando {comando} no exsite. ')
     comando_nuevo, llamar_comando = dic_comandos[comando][0], dic_comandos[comando][2]
-    if comando_nuevo == f.resolver_sistema_congruencias:                  # Los argumentos de esta función tiene una estructura distinta
+    if comando_nuevo == f.resolver_sistema_congruencias:                                                           # Los argumentos de esta función tiene una estructura distinta
         longitud = len(match.group(2).split(','))
         match_r_sist = re.findall(r"\[(-?\d+);(-?\d+);(-?\d+)\]", match.group(2))
         lista_argumentos = list(map(list, zip(*(map(int,num) for num in match_r_sist))))
@@ -65,48 +65,53 @@ def clean_command(comando_sucio: str, dic_comandos: dict) -> tuple:
             raise e.NOPError(f'El comando {comando} no se puede realizar con los argumentos dados. ')
 
     else:
-        lista_argumentos = re.findall(r"-?\d+", match.group(2))           # Empleamos el método findall. 
-        if len(lista_argumentos) != dic_comandos[comando][1]:             # Si esta lista no tiene los números necesarios para la operación se lanza una excepción. 
+        lista_argumentos = re.findall(r"-?\d+", match.group(2))             
+        if lista_argumentos == [] or (dic_comandos[comando][1] is not None and len(lista_argumentos) != dic_comandos[comando][1]):             # Si esta lista no tiene los números necesarios para la operación se lanza una excepción. 
             raise e.NOPError(f'El comando {comando} no se puede realizar con los argumentos dados. Se han introducido {len(lista_argumentos)} válidos cuándo se necesitaban {dic_comandos[comando][1]}. ')
         lista_argumentos = map(int, lista_argumentos)
-    comando_limpio = (comando_nuevo, llamar_comando, lista_argumentos)    # creamos la tupla solución convirtiendo los argumentos en enteros empleando map(int, args)
+    comando_limpio = (comando_nuevo, llamar_comando, lista_argumentos)                                             # creamos la tupla solución convirtiendo los argumentos en enteros empleando map(int, args)
     return comando_limpio 
 
-def run_bool(funcion, args): 
+def run_bool(funcion, args: list): 
     result = funcion(*args)
     return 'Sí' if result else 'No'
 
-def run_lprimos(funcion, args): 
+def run_lprimos(funcion, args: list): 
     result = funcion(*args)
     return str(result)[1:-1] if len(result) != 0 else 'NE'
 
-def run_factors(funcion, args): 
+def run_factors(funcion, args: list): 
     result = funcion(*args)
     return str(result)[1:-1] if len(result) != 0 else 0
 
-def run_mcd(funcion, args): 
+def run_mcd(funcion, args: list): 
+    if args != 2: 
+        return f.mcd_n(args)
     return funcion(*args)
 
-def run_mod_p(funcion, args): 
+def run_mod_p(funcion, args: list): 
     try: 
         return funcion(*args)
     except ZeroDivisionError as error: 
         return 'NE'
     except e.NOPError as error: 
-        return 'NE'
+        return 'NOP'
     
-def run_resSist(funcion, args): 
+def run_resSist(funcion, args: list): 
     try: 
         r, m = funcion(*args)
         return f'{r} (mod {m})'
     except ValueError as error: 
         return 'NE'
+    
+def run_mcd_n(funcion, args: list): 
+    return funcion(args)
 
 def run_program(comando_sucio, user=True):
 
     # Creamos un diccionario donde la clave es la función que pide el usuario y su valor asociado es una lista formada por la función de modular.py asociada al comando y el número 
     # de argumentos que recibe la función.  
-    dic_comandos = {'primo':[ f.es_primo, 1, run_bool],'primos': [f.lista_primos, 2, run_lprimos], 'factorizar': [f.factorizar, 1, run_factors], 'mcd': [f.mcd, 2, run_mcd], 'coprimos': [f.coprimos, 2, run_bool], 'pow': [f.potencia_mod_p, 3, run_mod_p], 'inv': [f.inversa_mod_p, 2, run_mod_p], 'euler': [f.euler, 1], 'legendre': [f.legendre, 2, run_mod_p], 'resolverSistema': [f.resolver_sistema_congruencias, None, run_resSist]}
+    dic_comandos = {'primo':[ f.es_primo, 1, run_bool],'primos': [f.lista_primos, 2, run_lprimos], 'factorizar': [f.factorizar, 1, run_factors], 'mcd': [f.mcd, None, run_mcd], 'coprimos': [f.coprimos, 2, run_bool], 'pow': [f.potencia_mod_p, 3, run_mod_p], 'inv': [f.inversa_mod_p, 2, run_mod_p], 'euler': [f.euler, 1, 'ARREGLAAAAAR'], 'legendre': [f.legendre, 2, run_mod_p], 'resolverSistema': [f.resolver_sistema_congruencias, None, run_resSist], 'mcd_n':[f.mcd_n, None, run_mcd_n]}
     try: 
         funcion, llamar_fun, args = clean_command(comando_sucio, dic_comandos)
         result = llamar_fun(funcion, args)     # Llamamos a la función, empleando '*' le pasamos cada elemento de la lista a cada argumento. 
