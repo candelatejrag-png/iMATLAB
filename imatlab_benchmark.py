@@ -22,7 +22,7 @@ import imatlab
 
 #Número de repeticiones de la toma de tiempos.
 #Aumentarlo disminuye efectos aleatorios o casuales en el código, pero aumenta el coste de ejecución.
-NITERS=100
+NITERS=2
 
 def testRun(in_file:str, out_file:str):
     """ Wrapper para timeit y profile que abre los ficheros proporcionados
@@ -79,10 +79,10 @@ def profile(in_file:str, out_file:str):
 if __name__ == "__main__":
     #Inicar el listado de ficheros de entrada y de salida para procesar
     #Comentar, añadir o eliminar ficheros según sea necesario.
-    in_files=["primosTest.txt","factorTest.txt","mcdTest.txt","potenciaTest.txt",
-               "invTest.txt","eulerTest.txt","sistemaTest.txt","cuadraticaTest.txt"]
-    out_files=["primosTest_obtained.txt","factorTest_obtained.txt","mcdTest_obtained.txt","potenciaTest_obtained.txt",
-               "invTest_obtained.txt","eulerTest_obtained.txt","sistemaTest_obtained.txt","cuadraticaTest_obtained.txt"]
+    # in_files=["primosTest.txt","factorTest.txt","mcdTest.txt","potenciaTest.txt",
+    #            "invTest.txt","eulerTest.txt","sistemaTest.txt","cuadraticaTest.txt"]
+    # out_files=["primosTest_obtained.txt","factorTest_obtained.txt","mcdTest_obtained.txt","potenciaTest_obtained.txt",
+    #            "invTest_obtained.txt","eulerTest_obtained.txt","sistemaTest_obtained.txt","cuadraticaTest_obtained.txt"]
     #in_files=["primosTest.txt","factorTest.txt","mcdTest.txt","potenciaTest.txt",
     #            "invTest.txt","eulerTest.txt","cuadraticaTest.txt"]
     #out_files=["primosTest_out.txt","factorTest_out.txt","mcdTest_out.txt","potenciaTest_out.txt",
@@ -91,14 +91,15 @@ if __name__ == "__main__":
     #out_files=["ejemplosSalida.txt"]
     # in_files=["sistemaTest.txt"]
     # out_files=["sistemaTest_out.txt"]
-    
+    in_files=["factorTest.txt"]
+    out_files=["factorTest_obtained.txt"]
     #Lista de tiempos obtenidos
     runtime=[]
     for i in range(0,len(in_files)):
         #Comentar una línea o la otra para alternar benchmarking/profiling
         try:
             runtime.append(measureTime(in_files[i],out_files[i]))
-            # profile(in_files[i],out_files[i])
+            profile(in_files[i],out_files[i])
         except IOError:
             runtime.append(0)
             print("El fichero "+in_files[i]+" no existe.\n")

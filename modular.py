@@ -329,7 +329,7 @@ def tcr_dos(r1:int, m1:int, r2:int, m2:int) -> tuple[int, int]:
 
     """
     if m1 == 0 or m2 == 0:
-        raise ValueError("modulo cero")     # no dividir por 0
+        raise ZeroDivisionError("modulo cero")     # no dividir por 0
     g, s, _ = bezout(m1, m2)                # g = mcd(m1, m2) y coeficientes de bezout
     if (r2 - r1) % g != 0:
         raise ValueError("incompatible")    # el sistema solo tiene solucion si g divide r2 - r1
@@ -345,7 +345,7 @@ def resolver_lineal(a:int, b:int, m:int) -> tuple[int, int]:
     Lanza ValueError si no hay solucion
     """
     if m == 0:
-        raise ValueError("modulo cero")
+        raise ZeroDivisionError("modulo cero")
     g, s, _ = bezout(a, m)
     if b % g != 0:
         raise ValueError("sin solucion")
