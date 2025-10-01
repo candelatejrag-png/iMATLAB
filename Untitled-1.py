@@ -6,7 +6,7 @@ import modular as f
 # lista_argus = list(map(list, zip(*(map(int,num) for num in match_r_sist))))
 # print(lista_argus)
 
-b = 1
+b = 61
 a = 11
 lista = list(range(2,b))
 result = list(range(max(a,2),b))
@@ -47,3 +47,5 @@ print(result)
 
 # if __name__ == '__main__': 
 #     print(bla(5,10))
+
+
