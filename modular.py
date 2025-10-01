@@ -1,6 +1,10 @@
 # importamos los scripts necesarios: 
 import errores as e
 
+# Creamos error necesario: 
+class IncompatibleEquationError(Exception): 
+    pass
+
 #  COMENZAMOS LA PRÁCTICA:
 
 # Apartado 1
@@ -385,7 +389,7 @@ def tcr_dos(r1:int, m1:int, r2:int, m2:int) -> tuple[int, int]:
         raise ValueError("modulo negativo")
     g, s, _ = bezout(m1, m2)                # g = mcd(m1, m2) y coeficientes de bezout
     if (r2 - r1) % g != 0:
-        raise ValueError("incompatible")    # el sistema solo tiene solucion si g divide r2 - r1
+        raise IncompatibleEquationError("incompatible")    # el sistema solo tiene solucion si g divide r2 - r1
     lcm = m1 // g * m2  
     k = ((r2 - r1) // g) * s
     res = (r1 + m1 * k) % lcm
@@ -403,7 +407,7 @@ def resolver_lineal(a:int, b:int, m:int) -> tuple[int, int]:
         raise ValueError("modulo negativo")
     g, s, _ = bezout(a, m)
     if b % g != 0:
-        raise ValueError("sin solucion")
+        raise IncompatibleEquationError("sin solucion")
     a1, b1, m1 = a // g, b // g, m // g
     r = mod(s * b1, m1)
     return r, m1

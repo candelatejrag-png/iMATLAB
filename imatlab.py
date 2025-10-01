@@ -22,6 +22,7 @@ import sys
 
 # importamos los scripts necesarios: 
 import modular as f
+import modular
 import errores as e
 import re 
 
@@ -102,7 +103,9 @@ def run_resSist(funcion, args: list):
         r, m = funcion(*args)
         return f'{r} (mod {m})'
     except ValueError as error: 
-        return 'NE'
+        return error
+    except modular.IncompatibleEquationError as error: 
+        return error
     
 def run_mcd_n(funcion, args: list): 
     return funcion(args)
