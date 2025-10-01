@@ -56,8 +56,8 @@ def lista_primos(a:int, b:int) -> list[int]:
     for x in range(max(2, a), b):       # Con max(2, a) evaluamos unicamente a partir del primer número primo positivo
         if es_primo(x):
             result.append(x)            # Si el número es primo lo añadimos a la lista solución
-
     return result
+    
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
 
@@ -147,7 +147,7 @@ def bezout(a:int, b:int) -> tuple[int, int, int]:
         x, y: punto del plano que satisface la ecuación a*x_o + b*y_o = r_antes
     """
 
-    r_antes, r = a, b   # Por eficiencia tomamos los valores absolutos de a y b dejando el mayor de ellos a
+    r_antes, r = a, b   
                                                 # la izquierda
     s_antes, s = 1, 0                           # |a| = 1*|a| + 0*|b|
     t_antes, t = 0, 1                           # |b| = 0*|a| + 1*|b|
