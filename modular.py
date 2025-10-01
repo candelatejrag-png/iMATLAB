@@ -419,10 +419,10 @@ def resolver_sistema_congruencias(alist, blist, plist):
     #     raise ValueError("entrada vacia o inconsistente")
     
     # primera ecuacion
-    r, modul = resolver_lineal(alist[0], blist[0], plist[0])
+    r, m = resolver_lineal(alist[0], blist[0], plist[0])
     for i in range(1, n):
         r2, m2 = resolver_lineal(alist[i], blist[i], plist[i])
-        r, m = tcr_dos(r, modul, r2, m2)
+        r, m = tcr_dos(r, m, r2, m2)
 
 
     return mod(r, m), m               # se devuelve r reducido al rango [0, m - 1] y el modulo m
