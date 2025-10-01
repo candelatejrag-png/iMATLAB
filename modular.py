@@ -414,14 +414,12 @@ def resolver_sistema_congruencias(alist, blist, plist):
     Acepta modulos no coprimos, lanza ValueError si no hay solucion
     Devuelve (r, m) con x congruente de r (mod m)
     """
-
     n = len(alist)
-    if n == 0 or n != len(blist) or n != len(plist):
-        raise ValueError("entrada vacia o inconsistente")
+    # if n == 0 or n != len(blist) or n != len(plist):
+    #     raise ValueError("entrada vacia o inconsistente")
     
     # primera ecuacion
     r, modul = resolver_lineal(alist[0], blist[0], plist[0])
-
     for i in range(1, n):
         r2, m2 = resolver_lineal(alist[i], blist[i], plist[i])
         r, m = tcr_dos(r, modul, r2, m2)
