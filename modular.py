@@ -147,26 +147,25 @@ def bezout(a:int, b:int) -> tuple[int, int, int]:
         x, y: punto del plano que satisface la ecuación a*x_o + b*y_o = r_antes
     """
 
-    r_antes, r = a, b   
-    r_antes, r = a, b   
+    r_antes, r = a, b    
                                                 # la izquierda
     x_antes, x = 1, 0                           # |a| = 1*|a| + 0*|b|
     y_antes, y = 0, 1                           # |b| = 0*|a| + 1*|b|
-    while r != 0: #>= 1:
+    while r >= 1:
         q = r_antes // r                        # Coeficiente de la división entera
         r_antes, r = r, r_antes - q*r           # Resto
         x_antes, x = x, x_antes - q*x           # Actualiza coeficiente de |a|
         y_antes, y = y, y_antes - q*y
 
-    max_cd, x_o, y_o = r_antes, x_antes, y_antes
-    if max_cd < 0:
-        max_cd, x_o, y_o = -r_antes, -x_antes, -y_antes
+    # max_cd, x_o, y_o = r_antes, x_antes, y_antes
+    # if max_cd < 0:
+    #     max_cd, x_o, y_o = -r_antes, -x_antes, -y_antes
 
-    # # En este punto, r_antes = mcd(|a|, |b|) y s_antes, t_antes son sus coeficientes
-    # x_o = x_antes if a >= 0 else -x_antes       # Corrige si a < 0
-    # y_o = y_antes if b >= 0 else -y_antes 
+    # En este punto, r_antes = mcd(|a|, |b|) y s_antes, t_antes son sus coeficientes
+    x_o = x_antes if a >= 0 else -x_antes       # Corrige si a < 0
+    y_o = y_antes if b >= 0 else -y_antes 
     
-    return max_cd, x_o, y_o
+    return r_antes, x_o, y_o
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
 
