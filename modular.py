@@ -143,21 +143,25 @@ def bezout(a:int, b:int) -> tuple[int, int, int]:
         x, y: punto del plano que satisface la ecuación a*x_o + b*y_o = r_antes
     """
 
-    r_antes, r = a, b   # Por eficiencia tomamos los valores absolutos de a y b dejando el mayor de ellos a
+    r_antes, r = a, b   
                                                 # la izquierda
-    s_antes, s = 1, 0                           # |a| = 1*|a| + 0*|b|
-    t_antes, t = 0, 1                           # |b| = 0*|a| + 1*|b|
-    while r >= 1:
+    x_antes, x = 1, 0                           # |a| = 1*|a| + 0*|b|
+    y_antes, y = 0, 1                           # |b| = 0*|a| + 1*|b|
+    while r != 0: #>= 1:
         q = r_antes // r                        # Coeficiente de la división entera
         r_antes, r = r, r_antes - q*r           # Resto
-        s_antes, s = s, s_antes - q*s           # Actualiza coeficiente de |a|
-        t_antes, t = t, t_antes - q*t
+        x_antes, x = x, x_antes - q*x           # Actualiza coeficiente de |a|
+        y_antes, y = y, y_antes - q*y
 
-    # En este punto, r_antes = mcd(|a|, |b|) y s_antes, t_antes son sus coeficientes
-    x_o = s_antes if a >= 0 else -s_antes       # Corrige si a < 0
-    y_o = t_antes if b >= 0 else -t_antes 
+    max_cd, x_o, y_o = r_antes, x_antes, y_antes
+    if max_cd < 0:
+        max_cd, x_o, y_o = -r_antes, -x_antes, -y_antes
+
+    # # En este punto, r_antes = mcd(|a|, |b|) y s_antes, t_antes son sus coeficientes
+    # x_o = x_antes if a >= 0 else -x_antes       # Corrige si a < 0
+    # y_o = y_antes if b >= 0 else -y_antes 
     
-    return r_antes, x_o, y_o
+    return max_cd, x_o, y_o
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
 
@@ -365,7 +369,6 @@ def mod(a:int, m:int) -> int:
     Returns: 
         (int): si m es > 0 devuelve el resto de la division entera
     """
-    # !!!!!!!!! CAMBIADO EL COMMENT MIRALO
     if m <= 0:
         raise ValueError("m debe ser > 0")
     return a % m
@@ -401,11 +404,11 @@ def resolver_lineal(a:int, b:int, m:int) -> tuple[int, int]:
         raise ValueError("modulo cero")
     if m < 0:
         raise ValueError("modulo negativo")
-    g, s, _ = bezout(a, m)
-    if b % g != 0:
+    maxcd, x, _ = bezout(a, m)
+    if b % maxcd != 0:
         raise ValueError("sin solucion")
-    a1, b1, m1 = a // g, b // g, m // g
-    r = mod(s * b1, m1)
+    a1, b1, m1 = a // maxcd, b // maxcd, m // maxcd
+    r = mod(x * b1, m1)
     return r, m1
 
 def resolver_sistema_congruencias(alist, blist, plist):
@@ -428,63 +431,95 @@ def resolver_sistema_congruencias(alist, blist, plist):
     return mod(r, m), m               # se devuelve r reducido al rango [0, m - 1] y el modulo m
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
+# 15
 
-# 14
-def ec_cuadratica(a:int, b:int, c:int, p:int):
+def carmichael(n:int) -> int:
     """
-    Devuelve las dos raices (posiblemente iguales) de ax^2 + bx + c = 0 (mod p) con p primo
-        - si no hay raices: devuelve None
-        - si hay dos raices: (x1, x2) con x1 < x2
-        - si hay una doble: (x, x)
-    Casos como a = 0 (mod p) se tratan como ecuacion lineal
+    Devuelve lambda(n), exponente de (Z/nZ)* ()
+    Requiere n > 0
+    Para n = 1, por convenio lambda(1) = 1
     """
-    if p <= 1 or not es_primo(p):
-        raise ValueError("p debe ser primo")
-    a %= p
-    b %= p
-    c %= p
-
-    if a == 0:
-        # bx + c = 0 (mod p)
-        if b == 0:
-            if c == 0:
-                # infinitas soluciones -> por convencion devolvemos (0,0)
-                return (0, 0)
-            else:
-                return None
-        x = (-c * inversa_mod_p(b, p)) % p
-        return (x, x)
+    if n <= 0:
+        raise ValueError("n debe ser > 0")
+    if n == 1:
+        return 1
     
-    # discriminante
-    delta = (b*b -4*a*c) % p
-    r = raiz_mod_p
+    fac = factorizar(n) # se queda como {p: e}
+    lam = 1
+    for p, e in fac.items():
+        if p == 2:
+            if e == 1:
+                lam_pe = 1
+            elif e == 2:
+                lam_pe = 2
+            else:
+                lam_pe = 2 ** (e -2) 
+        else:
+            lam_pe = (p - 1) * (p ** (e - 1))
+        
+        lam = lam // mcd(lam, lam_pe) * lam_pe
+    return lam
 
 
-# 12. (Opcional) Expandir la funcionalidad de resolver sistema congruencias y del comando resolverSistema para
-# resolver sistemas de ecuaciones donde los m´odulos no son coprimos entre s´ı.
-# 13. (Opcional) Investigar el algoritmo de Cipolla y programar en “modular.py” una funci´on
-# raiz mod p(n : int, p : int) −→ int
-# que reciba un entero n y un n´umero primo p y calcule una ra´ız de n m´odulo p, es decir, un entero x tal que
-# x
-# 2 ≡ n (mod p)
-# Usando dicha funci´on, agregar a IMAT-LAB un comando
-# raiz(n, p)
-# que devuelva lo siguiente:
-#  Si n tiene dos ra´ıces distintas x1 < x2, las escribe en orden: “x1, x2”
-#  Si n tiene una ´unica ra´ız x, escribe “x”
-#  Si n no tiene ra´ıces, como con el resto de comandos, escribe “NE” en modo “batch” o un mensaje de error
-# adecuado en modo interactivo.
-# 14. (Opcional) Usando la funci´on anterior, implementar en “modular.py” una funci´on
-# ecuacion cuadratica(a : int, b : int, c : int, p : int) −→ T uple[int, int]
-# que reciba enteros a, b, c y p, con p n´umero primo, y devuelva las dos soluciones m´odulo p (posiblemente repetidas)
-# de la ecuaci´on
-# ax2 + bx + c ≡ 0 (mod p)
-# Usando dicha funci´on, agregar a IMAT-LAB un comando
-# ecCuadratica(a, b, c, p)
-# que implemente la funcionalidad anterior y devuelva lo siguiente
-#  Si la ecuaci´on tiene dos ra´ıces distintas x1 < x2, las escribe en orden: “x1, x2”
-#  Si la ecuaci´on tiene una ´unica ra´ız doble x, escribe “x”
-#  Si la ecuaci´on no tiene ra´ıces, como co
+
+
+
+# # 14
+# def ec_cuadratica(a:int, b:int, c:int, p:int):
+#     """
+#     Devuelve las dos raices (posiblemente iguales) de ax^2 + bx + c = 0 (mod p) con p primo
+#         - si no hay raices: devuelve None
+#         - si hay dos raices: (x1, x2) con x1 < x2
+#         - si hay una doble: (x, x)
+#     Casos como a = 0 (mod p) se tratan como ecuacion lineal
+#     """
+#     if p <= 1 or not es_primo(p):
+#         raise ValueError("p debe ser primo")
+#     a %= p
+#     b %= p
+#     c %= p
+
+#     if a == 0:
+#         # bx + c = 0 (mod p)
+#         if b == 0:
+#             if c == 0:
+#                 # infinitas soluciones -> por convencion devolvemos (0,0)
+#                 return (0, 0)
+#             else:
+#                 return None
+#         x = (-c * inversa_mod_p(b, p)) % p
+#         return (x, x)
+    
+#     # discriminante
+#     delta = (b*b -4*a*c) % p
+#     r = raiz_mod_p
+
+
+# # 12. (Opcional) Expandir la funcionalidad de resolver sistema congruencias y del comando resolverSistema para
+# # resolver sistemas de ecuaciones donde los m´odulos no son coprimos entre s´ı.
+# # 13. (Opcional) Investigar el algoritmo de Cipolla y programar en “modular.py” una funci´on
+# # raiz mod p(n : int, p : int) −→ int
+# # que reciba un entero n y un n´umero primo p y calcule una ra´ız de n m´odulo p, es decir, un entero x tal que
+# # x
+# # 2 ≡ n (mod p)
+# # Usando dicha funci´on, agregar a IMAT-LAB un comando
+# # raiz(n, p)
+# # que devuelva lo siguiente:
+# #  Si n tiene dos ra´ıces distintas x1 < x2, las escribe en orden: “x1, x2”
+# #  Si n tiene una ´unica ra´ız x, escribe “x”
+# #  Si n no tiene ra´ıces, como con el resto de comandos, escribe “NE” en modo “batch” o un mensaje de error
+# # adecuado en modo interactivo.
+# # 14. (Opcional) Usando la funci´on anterior, implementar en “modular.py” una funci´on
+# # ecuacion cuadratica(a : int, b : int, c : int, p : int) −→ T uple[int, int]
+# # que reciba enteros a, b, c y p, con p n´umero primo, y devuelva las dos soluciones m´odulo p (posiblemente repetidas)
+# # de la ecuaci´on
+# # ax2 + bx + c ≡ 0 (mod p)
+# # Usando dicha funci´on, agregar a IMAT-LAB un comando
+# # ecCuadratica(a, b, c, p)
+# # que implemente la funcionalidad anterior y devuelva lo siguiente
+# #  Si la ecuaci´on tiene dos ra´ıces distintas x1 < x2, las escribe en orden: “x1, x2”
+# #  Si la ecuaci´on tiene una ´unica ra´ız doble x, escribe “x”
+# #  Si la ecuaci´on no tiene ra´ıces, como co
 
 
 
