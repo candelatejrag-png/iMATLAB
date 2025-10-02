@@ -6,5 +6,5 @@ class NEError(Exception):
 class NOPError(Exception): 
     pass
 
-class IncopatibleEcuationError(Exception): 
+class IncompatibleEcuationError(Exception): 
     pass

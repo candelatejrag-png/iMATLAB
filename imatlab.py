@@ -4,7 +4,7 @@ imatlab.py
 Matemática Discreta - IMAT
 ICAI, Universidad Pontificia Comillas
 
-Grupo: GPxxx
+Grupo: GP10
 Integrantes:
     - Candela Tejedo Raga
     - Gabriela Romero Martín
@@ -22,6 +22,7 @@ import sys
 
 # importamos los scripts necesarios: 
 import modular as f
+import modular
 import errores as e
 import re 
 
@@ -55,7 +56,7 @@ def clean_command(comando_sucio: str, dic_comandos: dict) -> tuple:
     
     comando = match.group(1)
     if comando not in dic_comandos:                                                                                # Si el comando no esta en el diccionario no forma parte de nuestra librería, lanzamos una excepción. 
-        raise e.NOPError(f'El comando {comando} no exsite. ')
+        raise e.NOPError(f'NOP')
     comando_nuevo, llamar_comando = dic_comandos[comando][0], dic_comandos[comando][2]
     if comando_nuevo == f.resolver_sistema_congruencias:                                                           # Los argumentos de esta función tiene una estructura distinta
         longitud = len(match.group(2).split(','))
@@ -102,16 +103,15 @@ def run_resSist(funcion, args: list):
         r, m = funcion(*args)
         return f'{r} (mod {m})'
     except ValueError as error: 
-        return 'NE'
-    
-def run_mcd_n(funcion, args: list): 
-    return funcion(args)
+        return error
+    except modular.IncompatibleEquationError as error: 
+        return error
 
 def run_program(comando_sucio, user=True):
 
     # Creamos un diccionario donde la clave es la función que pide el usuario y su valor asociado es una lista formada por la función de modular.py asociada al comando y el número 
     # de argumentos que recibe la función.  
-    dic_comandos = {'primo':[ f.es_primo, 1, run_bool],'primos': [f.lista_primos, 2, run_lprimos], 'factorizar': [f.factorizar, 1, run_factors], 'mcd': [f.mcd, None, run_mcd], 'coprimos': [f.coprimos, 2, run_bool], 'pow': [f.potencia_mod_p, 3, run_mod_p], 'inv': [f.inversa_mod_p, 2, run_mod_p], 'euler': [f.euler, 1, 'ARREGLAAAAAR'], 'legendre': [f.legendre, 2, run_mod_p], 'resolverSistema': [f.resolver_sistema_congruencias, None, run_resSist], 'mcd_n':[f.mcd_n, None, run_mcd_n]}
+    dic_comandos = {'primo':[ f.es_primo, 1, run_bool],'primos': [f.lista_primos, 2, run_lprimos], 'factorizar': [f.factorizar, 1, run_factors], 'mcd': [f.mcd, None, run_mcd], 'coprimos': [f.coprimos, 2, run_bool], 'pow': [f.potencia_mod_p, 3, run_mod_p], 'inv': [f.inversa_mod_p, 2, run_mod_p], 'euler': [f.euler, 1, run_mod_p], 'legendre': [f.legendre, 2, run_mod_p], 'resolverSistema': [f.resolver_sistema_congruencias, None, run_resSist], 'mcd_n':[f.mcd_n, None, run_mcd]}
     try: 
         funcion, llamar_fun, args = clean_command(comando_sucio, dic_comandos)
         result = llamar_fun(funcion, args)     # Llamamos a la función, empleando '*' le pasamos cada elemento de la lista a cada argumento. 

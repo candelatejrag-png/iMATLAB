@@ -1,6 +1,10 @@
 # importamos los scripts necesarios: 
 import errores as e
 
+# Creamos error necesario: 
+class IncompatibleEquationError(Exception): 
+    pass
+
 #  COMENZAMOS LA PRÁCTICA:
 
 # Apartado 1
@@ -52,8 +56,8 @@ def lista_primos(a:int, b:int) -> list[int]:
     for x in range(max(2, a), b):       # Con max(2, a) evaluamos unicamente a partir del primer número primo positivo
         if es_primo(x):
             result.append(x)            # Si el número es primo lo añadimos a la lista solución
-
     return result
+    
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
 
@@ -143,6 +147,7 @@ def bezout(a:int, b:int) -> tuple[int, int, int]:
         x, y: punto del plano que satisface la ecuación a*x_o + b*y_o = r_antes
     """
 
+    r_antes, r = a, b   
     r_antes, r = a, b   
                                                 # la izquierda
     x_antes, x = 1, 0                           # |a| = 1*|a| + 0*|b|
@@ -388,7 +393,7 @@ def tcr_dos(r1:int, m1:int, r2:int, m2:int) -> tuple[int, int]:
         raise ValueError("modulo negativo")
     g, s, _ = bezout(m1, m2)                # g = mcd(m1, m2) y coeficientes de bezout
     if (r2 - r1) % g != 0:
-        raise ValueError("incompatible")    # el sistema solo tiene solucion si g divide r2 - r1
+        raise IncompatibleEquationError("incompatible")    # el sistema solo tiene solucion si g divide r2 - r1
     lcm = m1 // g * m2  
     k = ((r2 - r1) // g) * s
     res = (r1 + m1 * k) % lcm
