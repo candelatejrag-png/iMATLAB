@@ -13,6 +13,6 @@ No
 NE
 4
 1
-El comando Legendre no exsite. 
+NOP
 10 (mod 33)
 El formato introducido no es el adecuado, introduzca comando(argumentos) para realizar la operación. Recuerde no introducir espacios entre los argumentos.

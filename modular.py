@@ -179,8 +179,6 @@ def mcd_n(nlist:list[int]) -> int:
     1. reduce con Euclides
     2. Si en algun punto g = 1, termina (atajo)
     """
-    if not nlist:
-        raise ValueError("lista vacía")
     g = 0
     for a in nlist:
         g = mcd(g, a)
@@ -195,8 +193,6 @@ def bezout_n(nlist:list[int]) -> tuple[int, list[int]]:
     - Lista vacía -> ValueError.
     - Todos ceros -> (0, [0,...,0]).
     """
-    if not nlist:
-        raise ValueError("lista vacía")
     n = len(nlist)
     if all(a == 0 for a in nlist):
         return 0, [0]*n
@@ -326,7 +322,8 @@ def euler(n:int) -> int:
     """
     if n == 0:
         return 0              # Por convenio
-    n = abs(n)                # Para admitir negativos porque phi depende de los factores primos, no del signo
+    if n < 0:                 # Para admitir negativos porque phi depende de los factores primos, no del signo
+        raise ValueError('la función de Euler solo acepta enteros positivos. ')
     if n == 1:
         return 1
     f = factorizar(n)         # El diccionario {primo: exponente}

@@ -19,6 +19,7 @@ lanzaría la interfaz de usuario para el modo interactivo.
 # Importamos las librerías necesarias:
 from typing import TextIO
 import sys
+import os
 
 # importamos los scripts necesarios: 
 import modular as f
@@ -97,6 +98,8 @@ def run_mod_p(funcion, args: list):
         return 'NE'
     except e.NOPError as error: 
         return 'NOP'
+    except ValueError as error: 
+        return error
     
 def run_resSist(funcion, args: list): 
     try: 
@@ -148,14 +151,18 @@ def run_commands(fin: TextIO, fout: TextIO):
 
 if __name__ == '__main__': 
 
-    if len(sys.argv) == 1:                        # Si no se han recibido datos por la terminal pasamos al modo automático, trabajamos con ficheros
-        with open('ejemplosComandos.txt', 'r') as fin: 
-            with open('salidaComandos.txt', 'w', encoding='utf-8') as fout: 
-                run_commands(fin, fout)
-    else:
-        nuevo_comando = sys.argv[1]
-        
+    if len(sys.argv) == 3:                        # Si se han recibido ficheros por la terminal se ejecuta el programa en modo lotes. 
+        if os.path(sys.argv(2)):                  # Validamos si el fichero de entrada existe, de lo contrario salimos del programa. 
+            with open(sys.argv(2), 'r') as fin: 
+                with open(sys.argv(3), 'w', encoding='utf-8') as fout: 
+                    run_commands(fin, fout)
+        else: 
+            print('El nombre del fichero introducido no existe. ')
+    else:                                         # Si no se han recibido los argumentos correctos se ejecuta el modo interactivo. 
+        if len(sys.argv) != 1:                    # Aviso que salta si ha recibido algún argumento de manera erronea. 
+            print('El número de argumentos dados no es válido. ')
+        nuevo_comando = input('Introduce una operación (Enter para salir): ')
         while nuevo_comando != '':
-            print(run_program(nuevo_comando))     # Ejecutamos el programa 
-            nuevo_comando = input('Nueva operación: ')
-        print('Has salido del programa. ')
+            print(run_program(nuevo_comando))     # Ejecutamos el programa.  
+            nuevo_comando = input('Nueva operación (Enter para salir): ')
+    print('Has salido del programa. ')
