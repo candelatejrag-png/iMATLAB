@@ -152,12 +152,12 @@ def run_commands(fin: TextIO, fout: TextIO):
 if __name__ == '__main__': 
 
     if len(sys.argv) == 3:                        # Si se han recibido ficheros por la terminal se ejecuta el programa en modo lotes. 
-        if os.path(sys.argv(2)):                  # Validamos si el fichero de entrada existe, de lo contrario salimos del programa. 
-            with open(sys.argv(2), 'r') as fin: 
-                with open(sys.argv(3), 'w', encoding='utf-8') as fout: 
+        if os.path.exists(sys.argv[2]):                  # Validamos si el fichero de entrada existe, de lo contrario salimos del programa. 
+            with open(sys.argv[2], 'r') as fin: 
+                with open(sys.argv[3], 'w', encoding='utf-8') as fout: 
                     run_commands(fin, fout)
         else: 
-            print('El nombre del fichero introducido no existe. ')
+            print(f'No se han podido procesar los ficheros, el fichero {sys.argv[2]} no existe. ')
     else:                                         # Si no se han recibido los argumentos correctos se ejecuta el modo interactivo. 
         if len(sys.argv) != 1:                    # Aviso que salta si ha recibido algún argumento de manera erronea. 
             print('El número de argumentos dados no es válido. ')

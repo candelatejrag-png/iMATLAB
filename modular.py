@@ -30,7 +30,7 @@ def es_primo(n:int) -> bool:
         return True                                 # 2 es el único número primo par
     if n % 2 == 0:
         return False                                # Si es par y mayor que 2, no es primo
-    for i in range(3, int(pow(n,0.5)) + 1, 2):      # Solo revisa impares hasta √n
+    for i in range(3, int(n**0.5) + 1, 2):      # Solo revisa impares hasta √n
         if n % i == 0:
             return False
     return True
@@ -353,7 +353,7 @@ def legendre(n:int, p:int) -> int:
     n_mod = n % p                               # n|p
     if n_mod == 0:
         return 0
-    val = pow(n_mod, (p - 1) // 2, p)           # el resto
+    val = potencia_mod_p(n_mod, (p - 1) // 2, p)           # el resto
     return -1 if val == p - 1 else int(val)     # int(val) solo puede ser 1
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
