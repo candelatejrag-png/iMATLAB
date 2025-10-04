@@ -7,10 +7,11 @@ from test_imatlab import try_command
     (3,True),
     (4,False),
     (5,True),
-    #(0,COMPLETAR),
-    #(1,COMPLETAR),
-    #(-1,COMPLETAR),
-    #COMPLETAR
+    (0,False),
+    (1,False),
+    (-1,False),
+    (27, False), 
+    (13, True)
 ])
 def test_es_primo_basico(n: int, salida_esperada: bool) -> None:
     assert(modular.es_primo(n)==salida_esperada)
@@ -18,10 +19,11 @@ def test_es_primo_basico(n: int, salida_esperada: bool) -> None:
 @pytest.mark.parametrize("n,salida_esperada",[
     (4,"No"),
     (5,"Sí"),
-    #(0,COMPLETAR),
-    #(1,COMPLETAR),
-    #(-1,COMPLETAR),
-    #COMPLETAR
+    (0,'No'),
+    (1,'No'),
+    (-1,'No'),
+    (61, 'Sí')
+    (276, 'No')
 ])
 def test_es_primo_imatlab(n: int, salida_esperada: str) -> None:
     try_command(f"primo({n})",salida_esperada)
