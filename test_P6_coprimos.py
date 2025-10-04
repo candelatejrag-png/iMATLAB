@@ -5,7 +5,9 @@ from test_imatlab import try_command
 @pytest.mark.parametrize("a,b,salida_esperada",[
     (14,20,False),
     (14,15,True),
-    #COMPLETAR    
+    (2,3,True),
+    (61,67,True),
+    (-18,-3,False)  
 ])
 def test_coprimos_basico(a: int, b:int, salida_esperada: bool) -> None:
     assert(modular.coprimos(a,b)==salida_esperada)
@@ -14,7 +16,9 @@ def test_coprimos_basico(a: int, b:int, salida_esperada: bool) -> None:
 @pytest.mark.parametrize("a,b,salida_esperada",[    
     (14,20,"No"),
     (14,15,"Sí"),
-    #COMPLETAR
+    (2,3,'Sí'),
+    (61,67,'Sí'),
+    (-18,-3,'No')  
 ])
 def test_coprimos_imatlab(a:int, b: int, salida_esperada: str) -> None:
     try_command(f"coprimos({a},{b})",salida_esperada)

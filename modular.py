@@ -147,7 +147,7 @@ def bezout(a:int, b:int) -> tuple[int, int, int]:
         x, y: punto del plano que satisface la ecuación a*x_o + b*y_o = r_antes
     """
 
-    r_antes, r = a, b    
+    r_antes, r = abs(a), abs(b)    
                                                 # la izquierda
     x_antes, x = 1, 0                           # |a| = 1*|a| + 0*|b|
     y_antes, y = 0, 1                           # |b| = 0*|a| + 1*|b|
@@ -298,7 +298,7 @@ def inversa_mod_p(n:int, p:int) -> int:
         raise e.NEError("NE")
     mcd_n_p, x_o, y_0 = bezout(n, p)    # Hacemos bezout 
     if mcd_n_p != 1:                    # Por definición
-        raise ZeroDivisionError(f"No existe inversa: mcd({n}, {p}) = {mcd_n_p} != 1")
+        raise ValueError('NE')
     # x puede ser negativo por lo que normalizamos al representante en [0, p-1] 
     # comoooo por queee
     return mod(x_o, p)

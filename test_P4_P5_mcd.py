@@ -5,7 +5,10 @@ from test_imatlab import try_command
 
 @pytest.mark.parametrize("a,b,salida_esperada",[
     (10,15,5),
-    #COMPLETAR    
+    (2,17,1),
+    (68,276,4),
+    (0,0,0),
+    (-22,-33,11)   
 ])
 def test_mcd_basico(a: int, b:int, salida_esperada: int) -> None:
     assert(modular.mcd(a,b)==salida_esperada)
@@ -13,7 +16,10 @@ def test_mcd_basico(a: int, b:int, salida_esperada: int) -> None:
 
 @pytest.mark.parametrize("a,b,mcd_esperado",[
     (6,10,2),
-    #COMPLETAR    
+    (2,17,1),
+    (68,276,4),
+    (0,0,0),
+    (-22,-33,11)     
 ])
 def test_bezout_basico(a: int, b:int, mcd_esperado: int) -> None:
     (d,x,y)=modular.bezout(a,b)
@@ -22,7 +28,9 @@ def test_bezout_basico(a: int, b:int, mcd_esperado: int) -> None:
 
 @pytest.mark.parametrize("nlist,salida_esperada",[
     ([4,10,14],2),
-    #COMPLETAR    
+    ([22,34,67],1),
+    ([0,0,0,0],0),
+    ([-90,-878,36],2)
 ])
 def test_mcd_n_basico(nlist: List[int], salida_esperada: int) -> None:
     assert(modular.mcd_n(nlist)==salida_esperada)
@@ -30,7 +38,9 @@ def test_mcd_n_basico(nlist: List[int], salida_esperada: int) -> None:
 
 @pytest.mark.parametrize("nlist,mcd_esperado",[
     ([4,10,14],2),
-    #COMPLETAR    
+    ([22,34,67],1),
+    ([0,0,0,0],0),
+    ([-90,-878,36],2)   
 ])
 def test_bezout_n_basico(nlist: List[int], mcd_esperado: int) -> None:
     (d,X)=modular.bezout_n(nlist)
@@ -45,7 +55,9 @@ def test_bezout_n_basico(nlist: List[int], mcd_esperado: int) -> None:
     ("mcd(10,15)","5"),
     ("mcd(4)","4"),
     ("mcd(4,10,14)","2"),
-    #COMPLETAR
+    ('mcd(-90,-878,36)','2'),
+    ('mcd(0,0,0,0)','0'),
+    ('mcd(88,99,77)','11')
 ])
 def test_mcd_n_imatlab(comando:str, salida_esperada: str) -> None:
     try_command(comando,salida_esperada)
