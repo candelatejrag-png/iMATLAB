@@ -446,9 +446,11 @@ def resolver_sistema_congruencias(alist, blist, plist):
 
 def carmichael(n:int) -> int:
     """
-    Devuelve lambda(n), exponente de (Z/nZ)* ()
+    Devuelve lambda(n), exponente (el menor x >= 1) tal que a^x congruente 1(mod n) para todo a coprimo con n
     Requiere n > 0
     Para n = 1, por convenio lambda(1) = 1
+    Factoriza n en {p: e} y calcula lambda(p^e) según las fórmulas detalladas en nuestra memoria
+    Acumula el resultado haciendo mcm, que lo calculamos con mcd
     """
     if n <= 0:
         raise ValueError("n debe ser > 0")
@@ -470,5 +472,3 @@ def carmichael(n:int) -> int:
         
         lam = lam // mcd(lam, lam_pe) * lam_pe
     return lam
-
-
