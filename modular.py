@@ -134,7 +134,7 @@ def mcd(a:int, b:int) -> int:
 
 def bezout(a:int, b:int) -> tuple[int, int, int]:
     """
-    Extensión del algoritmo de Euclides. Devuelve (g, x, y) tal que ax + by = g = mcd(a,b). El programa empezará por tomar el valor
+    Extensión del algoritmo de Euclides. Devuelve (g, x, y) tal que ax + by = d = mcd(a,b). El programa empezará por tomar el valor
     absoluto de los números y con un bucle realizará las operaciones del algoritmo, parará cuando el resto de una de dichas 
     operaciones sea 0. 
 
@@ -179,12 +179,12 @@ def mcd_n(nlist:list[int]) -> int:
     Args: 
         nlist (list): lista con los números de los que se quiere saber el mcd
     Returns: 
-        g (int): el valor de mcd(n1, n2, ..., nm)
+        d (int): el valor de mcd(n1, n2, ..., nm)
     """
-    g = 0
+    d = 0
     for a in nlist:
-        g = mcd(g, a)
-        if g == 1:            # atajo: no puede bajar de 1
+        d = mcd(g, a)
+        if d == 1:            # atajo: no puede bajar de 1
             return 1
     return g
 
@@ -284,7 +284,7 @@ def potencia_mod_p(base:int, exp:int, p:int) -> int:
 
 def inversa_mod_p(n:int, p:int) -> int:
     """
-    Inversa de n modulo p, si existe. Lanza ValueError si no existe (g != 1). La calculamos empleando el teorema de bezout. 
+    Inversa de n modulo p, si existe. Lanza ValueError si no existe (d != 1). La calculamos empleando el teorema de bezout. 
 
     Args:
         n (int): entero cuyo inverso modular se busca
@@ -388,10 +388,10 @@ def tcr_dos(r1:int, m1:int, r2:int, m2:int) -> tuple[int, int]:
         raise ValueError("modulo cero")                    # no dividir por 0
     if m1 < 0 or m2 < 0:
         raise ValueError("modulo negativo")
-    g, s, _ = bezout(m1, m2)                               # g = mcd(m1, m2) y coeficientes de bezout
-    if (r2 - r1) % g != 0:
-        raise IncompatibleEquationError("incompatible")    # el sistema solo tiene solucion si g divide r2 - r1
-    lcm = m1 // g * m2  
+    d, s, _ = bezout(m1, m2)                               # d = mcd(m1, m2) y coeficientes de bezout
+    if (r2 - r1) % d != 0:
+        raise IncompatibleEquationError("incompatible")    # el sistema solo tiene solucion si d divide r2 - r1
+    lcm = m1 // d * m2  
     k = ((r2 - r1) // g) * s
     res = (r1 + m1 * k) % lcm
     return res, lcm
@@ -411,10 +411,10 @@ def resolver_lineal(a:int, b:int, m:int) -> tuple[int, int]:
         raise IncompatibleEquationError("modulo cero")
     if m < 0:
         raise ValueError("modulo negativo")
-    maxcd, x, _ = bezout(a, m)
-    if b % maxcd != 0:
+    d, x, _ = bezout(a, m)
+    if b % d != 0:
         raise IncompatibleEquationError("sin solucion")
-    a1, b1, m1 = a // maxcd, b // maxcd, m // maxcd
+    a1, b1, m1 = a // d, b // d, m // d
     r = mod(x * b1, m1)
     return r, m1
 
