@@ -201,7 +201,7 @@ def run_commands(fin: TextIO, fout: TextIO):
             el usuario lanza desde la entrada estándar.
     """
     for linea in fin: 
-        result = run_program(linea.strip(), False)
+        result = run_program(linea.strip())
         if result is not None:
             fout.write(str(result)+'\n')
 
