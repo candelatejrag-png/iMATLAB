@@ -22,8 +22,8 @@ def test_es_primo_basico(n: int, salida_esperada: bool) -> None:
     (0,'No'),
     (1,'No'),
     (-1,'No'),
-    (61, 'Sí')
-    (276, 'No')
+    (61, 'Sí'),
+    (276, 'No'),
 ])
 def test_es_primo_imatlab(n: int, salida_esperada: str) -> None:
     try_command(f"primo({n})",salida_esperada)

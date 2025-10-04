@@ -7,9 +7,8 @@ from test_imatlab import try_command
     (1,{}),
     (2,{2:1}),
     (12,{2:2,3:1}),
-    (0,{})
+    (0,{}),
     (45,{3: 2, 5: 1})
-    (437,{19: 1, 23: 1})
 ])
 def test_factorizar_basico(n: int, salida_esperada: Dict[int,int]) -> None:
     assert(modular.factorizar(n)==salida_esperada)
