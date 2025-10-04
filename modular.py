@@ -173,11 +173,13 @@ def bezout(a:int, b:int) -> tuple[int, int, int]:
 
 def mcd_n(nlist:list[int]) -> int:
     """
-    Máximo común divisor de una lista de enteros.
-    - Lista vacía -> ValueError.
-    - Todos ceros -> 0.
-    1. reduce con Euclides
-    2. Si en algun punto g = 1, termina (atajo)
+    Máximo común divisor de una lista de enteros. Se calcula calculando el mcd de todos los enteros iterativamente hasta llegar al 
+    resultado. Reducimos la complejidad empleando el teorema de euclides para resolverlo y si en algún momento el mcd = 1 hemos terminado. 
+    
+    Args: 
+        nlist (list): lista con los números de los que se quiere saber el mcd
+    Returns: 
+        g (int): el valor de mcd(n1, n2, ..., nm)
     """
     g = 0
     for a in nlist:
@@ -188,8 +190,14 @@ def mcd_n(nlist:list[int]) -> int:
 
 def bezout_n(nlist:list[int]) -> tuple[int, list[int]]:
     """
-    Devuelve coeficientes de Bézout para n enteros.
-    Devuelve (d, coefs) con d = mcd(nlist) y sum(a_i*coefs[i]) = d.
+    Aplica el teorema de bezout a n entradas iterativamente para encontrar el máximo común divisor entre todos ellos. 
+
+    Args: 
+        nlist (list): lista con todos los números de los que queremos hallar el máximo común divisor 
+    Returns: 
+        d, coefs (tuple): tupla compuesta por: 
+            d (int): el resultado del mcd de todos los números
+            coefs (list): los coeficientes asociados a cada número n de la lista de entrada de la fórmula de Bezout. 
     - Lista vacía -> ValueError.
     - Todos ceros -> (0, [0,...,0]).
     """
@@ -202,15 +210,13 @@ def bezout_n(nlist:list[int]) -> tuple[int, list[int]]:
     coefs = [0]*n
     coefs[0] = 1 if nlist[0] >= 0 else -1
 
-    # Incorpora uno a uno usando Bézout: s*d + t*a = g
-    for i in range(1, n):
+    for i in range(1, n):     # Incorpora uno a uno usando Bézout: s*d + t*a = g
         a = nlist[i]
         g, s, t = bezout(d, a)
-        # Escala los coeficientes existentes por s
-        for j in range(i):
+        
+        for j in range(i):    # Escala los coeficientes existentes por s
             coefs[j] *= s
-        # Nuevo coeficiente para a_i
-        coefs[i] = t
+        coefs[i] = t          # Nuevo coeficiente para a_i
         d = g
         if d == 1:            # atajo si ya son coprimos
             return 1, coefs
@@ -242,8 +248,7 @@ def coprimos(a:int, b:int) -> bool:
 def potencia_mod_p(base:int, exp:int, p:int) -> int:
     """
     Función que devuelve el número (result) congruente a otro (base) elevado a un cierto exponente (exp) con módulo (p). 
-    Primero afrontaremos el posible caso de módulo = 1, esto devuelve un 0 automáticamente, despúes normalizaremos la base por
-    eficiencia
+    Después de evaluar los casos base se empleará el método de exponenciación modular y exponenciación binaria para hallar el resultado de manera óptima. 
 
     Args: 
         base (int): la base del número
@@ -252,39 +257,25 @@ def potencia_mod_p(base:int, exp:int, p:int) -> int:
     Returns:
         result (int): el resultado de la operación
     """
-    if p == 0 or base == 0 or exp == 0: 
-        raise ZeroDivisionError('No se puede dividir por 0. ')
-    if base < 0: 
+    if p == 0 or base == 0 and exp == 0: 
+        raise ZeroDivisionError('No se puede dividir por 0 ni elevar a 0. ')
+    if base < 0:                     # Actualizamos la base en el caso de que esta sea negativa
         base = p + base
-    if exp < 0: 
+    if exp < 0:                      # El exponente debe ser negativo, empleamos la fórmula b^e = b^(-1)*b^e
         base = inversa_mod_p(base,p)
         exp = abs(exp)
 
     if p == 1:
-        return 0                                   # Toda potencia es congruente a 0 (mod 1)
+        return 0                     # Toda potencia es congruente a 0 (mod 1)
     
-    base %= p                                      # Normaliza base al rango [0, p - 1] 
+    base %= p                        # Normaliza base al rango [0, p - 1] 
     
-
-    """
-    Exponenciacion modular -> usado en criptografia -> source: WIKIPEDIA
-    Muy eficiente, podemos pasar de O(e) a O(log(e)) 
-    https://es.wikipedia.org/wiki/Exponenciaci%C3%B3n_modular
-    Que es lo que entiendo por ahora de exponenciacion modular:
-        - si queremos calcular a^e mod p sin construir a^e que puede ser muy grande
-        - usamos el truco de 'cuadrar y multiplicar':
-            - si e es par: b^e = (b^2)^(e/2)
-            - si e es imapar: b^e = b*(b^2)^((e-1)/2)
-    Preguntar:
-        - por que es invariante, algo que ver con el pequeño teorema?
-        - no veo como cuadra la base
-    """
-    result = 1  # esto es simplemente un acumulador de factores
+    result = 1                       # Esto es simplemente un acumulador de factores
     while exp > 0:
-        if exp % 2 == 1:     # si exp impar -> 'usamos' la base
+        if exp % 2 == 1:             # Si exp impar -> 'usamos' la base, actualizamos el resultado
             result = (result * base) % p
-        base = (base * base) % p     # pasamos de b a b^2
-        exp //= 2          # deslazamos el exponente -> quitamos el bit ya procesado
+        base = (base * base) % p     # Pasamos de b a b^2
+        exp //= 2                    # Deslazamos el exponente -> quitamos el bit ya procesado
     return result
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
@@ -293,7 +284,7 @@ def potencia_mod_p(base:int, exp:int, p:int) -> int:
 
 def inversa_mod_p(n:int, p:int) -> int:
     """
-    Inversa de n modulo p, si existe. Lanza ValueError si no existe (g != 1)
+    Inversa de n modulo p, si existe. Lanza ValueError si no existe (g != 1). La calculamos empleando el teorema de bezout. 
 
     Args:
         n (int): entero cuyo inverso modular se busca
@@ -304,7 +295,7 @@ def inversa_mod_p(n:int, p:int) -> int:
     if p == 0: 
         raise ZeroDivisionError('No se puede dividir por 0. ')
     if p <= 1:
-        raise e.NEError("NE") # siii!!! por queee
+        raise e.NEError("NE")
     mcd_n_p, x_o, y_0 = bezout(n, p)    # Hacemos bezout 
     if mcd_n_p != 1:                    # Por definición
         raise ZeroDivisionError(f"No existe inversa: mcd({n}, {p}) = {mcd_n_p} != 1")
@@ -318,7 +309,13 @@ def inversa_mod_p(n:int, p:int) -> int:
 
 def euler(n:int) -> int:
     """
-    euler(n) devuelve el numero de enteros 1 <= k <= n que son coprimos con n
+    Euler(n) devuelve el numero de enteros 1 <= k <= n que son coprimos con n. Se calculará empleando las propiedades que cumple esta
+    función en relación con los números primos. 
+
+    Args: 
+        n (int): el número del que se quieren saber sus número de coprimos
+    Returns: 
+        phi (int): el valor de la función de Euler
     """
     if n == 0:
         return 0              # Por convenio
@@ -337,24 +334,25 @@ def euler(n:int) -> int:
 # Apartado 10
 
 def legendre(n:int, p:int) -> int:
-    """Devuelve el simbolo de Legendre (n|p) para un primo impar p
-    Valores posibles:
-        1 -> n si es residuo cuadratico modulo p (existe x xon x^2 congruente de n (mod p))
-        -1 -> n no es residuo cuadratico modulo p
-        0 -> p|n (n congruente de 0 para (mod p))
-    ** pow(base, exp, m) es la potencia modular de python
-        y devuelve: (base^exp) mod m
-    --> la usamos porque es mucho mas eficiente que elevar y luego hacer %    
+    """Devuelve el simbolo de Legendre (n|p) para un primo impar p basando los cálculos en el criterio de Euler. 
+    
+    Args: 
+        n (int): número al que se le quiere aplicar la función
+        p (int): módulo de n
+    Returns: 
+        1:  n si es residuo cuadratico modulo p (existe x xon x^2 congruente de n (mod p))
+        -1:  n no es residuo cuadratico modulo p
+        0:  p|n (n congruente de 0 para (mod p)), p divide a n
     """
     if p == 0: 
         raise ZeroDivisionError('No se puede dividir por 0. ')
     if p <= 2 or not es_primo(p):
         raise ValueError("p debe ser primo impar")
-    n_mod = n % p                               # n|p
+    n_mod = n % p                                   # n|p
     if n_mod == 0:
         return 0
-    val = potencia_mod_p(n_mod, (p - 1) // 2, p)           # el resto
-    return -1 if val == p - 1 else int(val)     # int(val) solo puede ser 1
+    val = potencia_mod_p(n_mod, (p - 1) // 2, p)    # el resto
+    return -1 if val == p - 1 else int(val)         # int(val) solo puede ser 1
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
 
@@ -374,20 +372,23 @@ def mod(a:int, m:int) -> int:
         raise ValueError("m debe ser > 0")
     return a % m
 
-
-
 def tcr_dos(r1:int, m1:int, r2:int, m2:int) -> tuple[int, int]:
     """
-    Resuelve un sistema de dos congruencias usando el Teorema Chino del Resto
-    Combina x = r1 (mod m1) y x = r2 (mod m2) para modulos no necesariamente coprimos
-    Lanza Value Error si no hay solucion
+    Resuelve un sistema de dos congruencias usando el Teorema Chino del Resto. Combina x = r1 (mod m1) y x = r2 (mod m2) para modulos
+    no necesariamente coprimos. Lanza Value Error si no hay solucion. 
 
+    Args: 
+        r1 (int): número con módulo m1 congruente a x
+        r2 (int): número con módulo m2 congruente a x
+        m1, m2 (int): módulos de las dos ecuaciones a resolver
+    Returns:
+        res, lcm (tupla): devuelve la solución del sistema de dos congruencias en formato res (mod lcm) 
     """
     if m1 == 0 or m2 == 0:
-        raise ValueError("modulo cero")     # no dividir por 0
+        raise ValueError("modulo cero")                    # no dividir por 0
     if m1 < 0 or m2 < 0:
         raise ValueError("modulo negativo")
-    g, s, _ = bezout(m1, m2)                # g = mcd(m1, m2) y coeficientes de bezout
+    g, s, _ = bezout(m1, m2)                               # g = mcd(m1, m2) y coeficientes de bezout
     if (r2 - r1) % g != 0:
         raise IncompatibleEquationError("incompatible")    # el sistema solo tiene solucion si g divide r2 - r1
     lcm = m1 // g * m2  
@@ -397,42 +398,51 @@ def tcr_dos(r1:int, m1:int, r2:int, m2:int) -> tuple[int, int]:
 
 def resolver_lineal(a:int, b:int, m:int) -> tuple[int, int]:
     """
-    Resuleve a*x = b (mod m)
-    Devuelve (r, mod') con x = r (mod mod')
-    Lanza ValueError si no hay solucion
+    Resuleve el sistema de estructura a*x = b (mod m) Empleando el teotema de bezout. Lanza ValueError si no hay solucion
+
+    Args: 
+        a (int): número que multiplica a la x en la ecuación
+        b (int): número con módulo p congruente a xa
+        m (int): módulo de la ecuación
+    Returns: 
+        r, m1 (tuple): tupla solución en el formato r (mod m1) de tal modo que x = r (mod m1)
     """
     if m == 0:
-        raise ValueError("modulo cero")
+        raise IncompatibleEquationError("modulo cero")
     if m < 0:
         raise ValueError("modulo negativo")
     maxcd, x, _ = bezout(a, m)
     if b % maxcd != 0:
-        raise ValueError("sin solucion")
+        raise IncompatibleEquationError("sin solucion")
     a1, b1, m1 = a // maxcd, b // maxcd, m // maxcd
     r = mod(x * b1, m1)
     return r, m1
 
 def resolver_sistema_congruencias(alist, blist, plist):
     """
-    Resuelve el sistema aix congruente a bi (mod pi)
-    Acepta modulos no coprimos, lanza ValueError si no hay solucion
+    Resuelve el sistema aix congruente a bi (mod pi). Acepta modulos no coprimos, lanza ValueError si no hay solucion
     Devuelve (r, m) con x congruente de r (mod m)
+
+    Args: 
+        alist (list): lista de todos los valores que multiplican a la x en cada ecuación
+        blist (list): lista de todos los valores que con módulo p congruentes a aix
+        plist (list): lista de todos los módulos de cada ecuación del sistema
+    Returns: 
+        r, m (tuple): devuelve la solución del sistema en formato de tupla de tal manera que la solución es r (mod m). 
     """
     n = len(alist)
-    # if n == 0 or n != len(blist) or n != len(plist):
-    #     raise ValueError("entrada vacia o inconsistente")
-    
     # primera ecuacion
-    r, m = resolver_lineal(alist[0], blist[0], plist[0])
+    r, m = resolver_lineal(alist[0], blist[0], plist[0])          # comenzamos resolviendo la primera ecuación
     for i in range(1, n):
-        r2, m2 = resolver_lineal(alist[i], blist[i], plist[i])
-        r, m = tcr_dos(r, m, r2, m2)
+        r2, m2 = resolver_lineal(alist[i], blist[i], plist[i])    # resolvemos ecuación
+        r, m = tcr_dos(r, m, r2, m2)                              # empleando el teorema chino del resto dos a dos valos resolviendo todo el sistema
 
 
-    return mod(r, m), m               # se devuelve r reducido al rango [0, m - 1] y el modulo m
+    return mod(r, m), m                                           # se devuelve r reducido al rango [0, m - 1] y el modulo m
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
-# 15
+
+# Apartado 15: 
 
 def carmichael(n:int) -> int:
     """
@@ -460,72 +470,5 @@ def carmichael(n:int) -> int:
         
         lam = lam // mcd(lam, lam_pe) * lam_pe
     return lam
-
-
-
-
-
-# # 14
-# def ec_cuadratica(a:int, b:int, c:int, p:int):
-#     """
-#     Devuelve las dos raices (posiblemente iguales) de ax^2 + bx + c = 0 (mod p) con p primo
-#         - si no hay raices: devuelve None
-#         - si hay dos raices: (x1, x2) con x1 < x2
-#         - si hay una doble: (x, x)
-#     Casos como a = 0 (mod p) se tratan como ecuacion lineal
-#     """
-#     if p <= 1 or not es_primo(p):
-#         raise ValueError("p debe ser primo")
-#     a %= p
-#     b %= p
-#     c %= p
-
-#     if a == 0:
-#         # bx + c = 0 (mod p)
-#         if b == 0:
-#             if c == 0:
-#                 # infinitas soluciones -> por convencion devolvemos (0,0)
-#                 return (0, 0)
-#             else:
-#                 return None
-#         x = (-c * inversa_mod_p(b, p)) % p
-#         return (x, x)
-    
-#     # discriminante
-#     delta = (b*b -4*a*c) % p
-#     r = raiz_mod_p
-
-
-# # 12. (Opcional) Expandir la funcionalidad de resolver sistema congruencias y del comando resolverSistema para
-# # resolver sistemas de ecuaciones donde los m´odulos no son coprimos entre s´ı.
-# # 13. (Opcional) Investigar el algoritmo de Cipolla y programar en “modular.py” una funci´on
-# # raiz mod p(n : int, p : int) −→ int
-# # que reciba un entero n y un n´umero primo p y calcule una ra´ız de n m´odulo p, es decir, un entero x tal que
-# # x
-# # 2 ≡ n (mod p)
-# # Usando dicha funci´on, agregar a IMAT-LAB un comando
-# # raiz(n, p)
-# # que devuelva lo siguiente:
-# #  Si n tiene dos ra´ıces distintas x1 < x2, las escribe en orden: “x1, x2”
-# #  Si n tiene una ´unica ra´ız x, escribe “x”
-# #  Si n no tiene ra´ıces, como con el resto de comandos, escribe “NE” en modo “batch” o un mensaje de error
-# # adecuado en modo interactivo.
-# # 14. (Opcional) Usando la funci´on anterior, implementar en “modular.py” una funci´on
-# # ecuacion cuadratica(a : int, b : int, c : int, p : int) −→ T uple[int, int]
-# # que reciba enteros a, b, c y p, con p n´umero primo, y devuelva las dos soluciones m´odulo p (posiblemente repetidas)
-# # de la ecuaci´on
-# # ax2 + bx + c ≡ 0 (mod p)
-# # Usando dicha funci´on, agregar a IMAT-LAB un comando
-# # ecCuadratica(a, b, c, p)
-# # que implemente la funcionalidad anterior y devuelva lo siguiente
-# #  Si la ecuaci´on tiene dos ra´ıces distintas x1 < x2, las escribe en orden: “x1, x2”
-# #  Si la ecuaci´on tiene una ´unica ra´ız doble x, escribe “x”
-# #  Si la ecuaci´on no tiene ra´ıces, como co
-
-
-
-
-
-
 
 

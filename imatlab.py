@@ -32,34 +32,31 @@ import re
 def clean_command(comando_sucio: str, dic_comandos: dict) -> tuple:
     '''Función que limpia y valida los comandos recibidos por pantalla encontrando la función de modular.py que se corresponde con la que pide el usuario expleando expresiones
     regurales en leguaje Regex con el fin de volver la búsqueda más eficiente. En el caso de que el usuario haya introducido el comando mal se lanzará un NOPError.  
-    Empleando expresiones regulares creamos el patrón de la estructura que debe tener el input de pantalla (comando(Argumentos)). Esta expresión se divide en dos grupos. El 
-    primero corresponde al comando que se quiere realizar (más adelante se validará si este es válido, si tiene una fucnión de modular.py asociada) y el segundo a todo lo que
-    este dentro de los parentesís de forma perezosa (lazy). Más adelante se válidará si lo que se encuentra dentro del paréntesis tiene el formato adecuado haciendo uso del método 
-    findall que, junto a la expresión -?[0-9]+ que nos creará una lista solo con los números (todavia serán tipo int, eso se cambiará más adelante) que encuentre en el grupo 2 
-    (el grupo de los argumentos).
+    Empleando expresiones regulares creamos el patrón de la estructura que debe tener el input de pantalla (comando(Argumentos)). De este modo se encontrará tanto la función
+    de modular.py que realiza el comando y los argumentos que se le deben mandar junto con la función auxiliar de la interfaz que hará la llamada. 
     
     Ejemplo: 
-        Al aplicarle esta función a pow(2,3,4) se devolverá: (f.potencia_mod_p, [2,3,4])
+        Al aplicarle esta función a pow(2,3,4) se devolverá: (f.potencia_mod_p, run_mod_p, [2,3,4])
     Args:
         comando_sucio (str): string escrito por el usuario. 
         dic_comandos (dict): diccionario que contiene como clave los nombres de cada función que debe introducir el usuario y como valores listas. En la primera posición de la 
         lista (posición 0 en indexación de python) encontramos el la función de modular.py asociada al comando que se ha pedido por pantalla y en la segunda posición
         el número de argumentos (números enteros) que se deben de haber introducido para resolver la operación. 
     Returns: 
-        comando_limpio (tuple): se devuelve una tupla con la función que se va a ejecutar y la lista de argumentos (previamente convertidos a tipo int). 
+        comando_limpio (tuple): se devuelve una tupla con la función que se va a ejecutar, la función auixiliar y la lista de argumentos (previamente convertidos a tipo int). 
     '''
     
     pattern = re.compile(r"([a-zA-Z_]+)+\((.*?)\)")
 
     match = re.search(pattern, comando_sucio)
-    if not match:                                                                                                  # Si el comando introducido por el usuario no tiene un formato adecuado lanzamos una excepción.
+    if not match:                                                                                                                     # Si el comando introducido por el usuario no tiene un formato adecuado lanzamos una excepción.
         raise e.NOPError('El formato introducido no es el adecuado, introduzca comando(argumentos) para realizar la operación. Recuerde no introducir espacios entre los argumentos.')
     
     comando = match.group(1)
-    if comando not in dic_comandos:                                                                                # Si el comando no esta en el diccionario no forma parte de nuestra librería, lanzamos una excepción. 
+    if comando not in dic_comandos:                                                                                                   # Si el comando no esta en el diccionario no forma parte de nuestra librería, lanzamos una excepción. 
         raise e.NOPError(f'NOP')
     comando_nuevo, llamar_comando = dic_comandos[comando][0], dic_comandos[comando][2]
-    if comando_nuevo == f.resolver_sistema_congruencias:                                                           # Los argumentos de esta función tiene una estructura distinta
+    if comando_nuevo == f.resolver_sistema_congruencias:                                                                              # Los argumentos de esta función tiene una estructura distinta
         longitud = len(match.group(2).split(','))
         match_r_sist = re.findall(r"\[(-?\d+);(-?\d+);(-?\d+)\]", match.group(2))
         lista_argumentos = list(map(list, zip(*(map(int,num) for num in match_r_sist))))
@@ -68,30 +65,72 @@ def clean_command(comando_sucio: str, dic_comandos: dict) -> tuple:
 
     else:
         lista_argumentos = re.findall(r"-?\d+", match.group(2))             
-        if lista_argumentos == [] or (dic_comandos[comando][1] is not None and len(lista_argumentos) != dic_comandos[comando][1]):             # Si esta lista no tiene los números necesarios para la operación se lanza una excepción. 
+        if lista_argumentos == [] or (dic_comandos[comando][1] is not None and len(lista_argumentos) != dic_comandos[comando][1]):    # Si esta lista no tiene los números necesarios para la operación se lanza una excepción. 
             raise e.NOPError(f'El comando {comando} no se puede realizar con los argumentos dados. Se han introducido {len(lista_argumentos)} válidos cuándo se necesitaban {dic_comandos[comando][1]}. ')
         lista_argumentos = map(int, lista_argumentos)
-    comando_limpio = (comando_nuevo, llamar_comando, lista_argumentos)                                             # creamos la tupla solución convirtiendo los argumentos en enteros empleando map(int, args)
+    comando_limpio = (comando_nuevo, llamar_comando, lista_argumentos)                                                                # creamos la tupla solución convirtiendo los argumentos en enteros empleando map(int, args)
     return comando_limpio 
 
 def run_bool(funcion, args: list): 
+    '''Función que puede llamar a otra función que devuleve un booleano. 
+    
+    Args: 
+        funcion: la función a la que se quiere llamar
+        args (list): lista de los argumentos de dicha función
+    Returns: 
+        En función del valor booleano que devuelve la función ejecutada esta devuelve Sí o No
+    '''
     result = funcion(*args)
     return 'Sí' if result else 'No'
 
 def run_lprimos(funcion, args: list): 
+    '''Función que puede llamar a otra función que devuleve una lista, una tupla o un diccionario. 
+    
+    Args: 
+        funcion: la función a la que se quiere llamar
+        args (list): lista de los argumentos de dicha función
+    Returns: 
+        si lo que devuelve la función tiene una longitud mayor que 0 lo devuelve en formato string de lo contrario NE
+    '''
     result = funcion(*args)
     return str(result)[1:-1] if len(result) != 0 else 'NE'
 
 def run_factors(funcion, args: list): 
+    '''Función que puede llamar a otra función que devuleve una lista. 
+    
+    Args: 
+        funcion: la función a la que se quiere llamar
+        args (list): lista de los argumentos de dicha función
+    Returns: 
+        si lo que devuelve la función tiene una longitud mayor que 0 lo devuelve en formato string de lo contrario 0
+    '''
     result = funcion(*args)
     return str(result)[1:-1] if len(result) != 0 else 0
 
 def run_mcd(funcion, args: list): 
+    '''Función que puede llamar a otra función que devuleve un número. Demendiendo del número de argumentos recibidos se calculará el mcd
+    empleando mcd o mcd_n.  
+    
+    Args: 
+        funcion: la función a la que se quiere llamar
+        args (list): lista de los argumentos de dicha función
+    Returns: 
+        (int): el valor del mcd calculado
+    '''
     if args != 2: 
         return f.mcd_n(args)
     return funcion(*args)
 
 def run_mod_p(funcion, args: list): 
+    '''Función que puede llamar a otra función que devuleve un número entero. 
+    
+    Args: 
+        funcion: la función a la que se quiere llamar
+        args (list): lista de los argumentos de dicha función
+    Returns: 
+        se gestionan los posibles errores que pueden mandar las funciones de modular y se devuelve NE, NOP o, de serlo, información sobre un error específico. 
+        De no haber error se devuelve el resultado obtenido al llamar a la función. 
+    '''
     try: 
         return funcion(*args)
     except ZeroDivisionError as error: 
@@ -102,6 +141,15 @@ def run_mod_p(funcion, args: list):
         return error
     
 def run_resSist(funcion, args: list): 
+    '''Función que llama a otra función para que resuelva un sistema de ecuaciones que devuleve una tupla de dos valores. 
+    
+    Args: 
+        funcion: la función a la que se quiere llamar
+        args (list): lista de los argumentos de dicha función
+    Returns: 
+        se gestionan los posibles errores que pueden mandar las funciones de modular y se devuelve información sobre un error específico. 
+        De no haber error se devuelve el resultado obtenido al llamar a la función en formato del string r (mod m).
+        '''
     try: 
         r, m = funcion(*args)
         return f'{r} (mod {m})'
@@ -110,7 +158,16 @@ def run_resSist(funcion, args: list):
     except modular.IncompatibleEquationError as error: 
         return error
 
-def run_program(comando_sucio, user=True):
+def run_program(comando_sucio: str):
+    '''Función que ejecuta un comando obteniendo su resultado empleando firefentes funciones auxiliares. Primero obtendrá los datos que buscamos aplicandole clean_command al comando
+    recibido, después ejecutará la función auxiliar de la interfaz que conecta con modular.py y por último trecibirá su resultado. 
+    
+    Args: 
+        comando_sucio (str): el comando que se quiere realizar
+    Returns: 
+        se gestionan los posibles errores que puede mandar la función clean_command y se devuelve información sobre un error específico. 
+        De no haber error se devuelve el resultado obtenido al llamar a la función auxiliar.
+    '''
 
     # Creamos un diccionario donde la clave es la función que pide el usuario y su valor asociado es una lista formada por la función de modular.py asociada al comando y el número 
     # de argumentos que recibe la función.  
@@ -152,7 +209,7 @@ def run_commands(fin: TextIO, fout: TextIO):
 if __name__ == '__main__': 
 
     if len(sys.argv) == 3:                        # Si se han recibido ficheros por la terminal se ejecuta el programa en modo lotes. 
-        if os.path.exists(sys.argv[2]):                  # Validamos si el fichero de entrada existe, de lo contrario salimos del programa. 
+        if os.path.exists(sys.argv[2]):           # Validamos si el fichero de entrada existe, de lo contrario salimos del programa. 
             with open(sys.argv[2], 'r') as fin: 
                 with open(sys.argv[3], 'w', encoding='utf-8') as fout: 
                     run_commands(fin, fout)
