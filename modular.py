@@ -22,7 +22,8 @@ def es_primo(n:int) -> bool:
         n (int): número que la función debe evaluar
     Returns: 
         (bool): devuelve True si n es primo y False de lo contrario
-    """
+        """
+    
 
     if n < 2:                                       # El 2 es el primo positivo más pequeño
         return False
