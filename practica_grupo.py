@@ -91,4 +91,7 @@ for num in nums:
         texto_descifrado += char
         dic[num] = char
 
-print(f'\nEl texto descifrado de X es {texto_descifrado}')
+print(f'\nEl texto descifrado de X es: ')
+print(texto_descifrado)
+
+print(f'\nEste texto es un fragmento de la obra El fractal, escrito por Susana Merchán')
