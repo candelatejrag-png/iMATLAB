@@ -184,10 +184,10 @@ def mcd_n(nlist:list[int]) -> int:
     """
     d = 0
     for a in nlist:
-        d = mcd(g, a)
+        d = mcd(d, a)
         if d == 1:            # atajo: no puede bajar de 1
             return 1
-    return g
+    return d
 
 def bezout_n(nlist:list[int]) -> tuple[int, list[int]]:
     """
@@ -393,7 +393,7 @@ def tcr_dos(r1:int, m1:int, r2:int, m2:int) -> tuple[int, int]:
     if (r2 - r1) % d != 0:
         raise IncompatibleEquationError("incompatible")    # el sistema solo tiene solucion si d divide r2 - r1
     lcm = m1 // d * m2  
-    k = ((r2 - r1) // g) * s
+    k = ((r2 - r1) // d) * s
     res = (r1 + m1 * k) % lcm
     return res, lcm
 
