@@ -4,16 +4,17 @@ rsa.py
 Matemática Discreta - IMAT
 ICAI, Universidad Pontificia Comillas
 
-Grupo: GPxxx
+Grupo: GP10
 Integrantes:
-    - XX
-    - XX
+    - Candela Tejedo Raga
+    - Gabriela Romero Martín
 
 Descripción:
 Librería para la realización de cifrado y descifrado usando el algoritmo RSA.
 """
-import modular
+import modular as m
 from typing import Tuple,List
+import random
 
 
 def generar_claves(min_primo:int,max_primo:int)-> Tuple[int,int,int]:
@@ -34,7 +35,11 @@ def generar_claves(min_primo:int,max_primo:int)-> Tuple[int,int,int]:
     Raises:
         ValueError: Si no es posible encontrar una pareja de primos distintos p1,p2 entre min_primo y max_primo
     """
-    pass
+    l_primos = m.lista_primos(min_primo, max_primo)
+    p1 = random.choice(l_primos)
+    p2 = random.choice(l_primos)
+    phi = (p1-1)*(p2-2)
+    return (p1*p2,3,m.inversa_mod_p(3,phi))
 
 def aplicar_padding(m:int,digitos_padding:int)->int:
     """Dado un mensaje y un número de dígitos de padding, añade
@@ -139,7 +144,7 @@ def codificar_cadena(s:str)->List[int]:
     Example:
         codificar_cadena("¡Hola mundo!")=[161, 72, 111, 108, 97, 32, 109, 117, 110, 100, 111, 33]
     """
-    pass
+    return list(ord(i) for i in s)
 
 
 def decodificar_cadena(m:List[int])->str:
@@ -158,7 +163,7 @@ def decodificar_cadena(m:List[int])->str:
     Example:
         decodificar_cadena([161, 72, 111, 108, 97, 32, 109, 117, 110, 100, 111, 33])="¡Hola mundo!"
     """
-    pass
+    return "".join(map(chr,m)) # aqui map(chr,m) es equivalente a decir -> chr(i) for i in m
 
 
 def cifrar_cadena_rsa(s:str,n:int,e:int,digitos_padding:int)->List[int]:
