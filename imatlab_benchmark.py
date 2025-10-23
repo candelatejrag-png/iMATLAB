@@ -91,8 +91,8 @@ if __name__ == "__main__":
     #out_files=["ejemplosSalida.txt"]
     # in_files=["sistemaTest.txt"]
     # out_files=["sistemaTest_out.txt"]
-    in_files=["factorTest.txt"]
-    out_files=["factorTest_obtained.txt"]
+    in_files=["primosTest.txt"]
+    out_files=["primosTest_obtained.txt"]
     #Lista de tiempos obtenidos
     runtime=[]
     for i in range(0,len(in_files)):
