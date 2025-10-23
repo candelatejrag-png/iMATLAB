@@ -55,7 +55,7 @@ def lista_primos(a:int, b:int) -> list[int]:
     if a >= b:
         return result                   # Si a >= b, devuelve [] vacio
     for x in range(max(2, a), b):       # Con max(2, a) evaluamos unicamente a partir del primer número primo positivo
-        if posible_primos(x):
+        if es_primo(x):
             result.append(x)            # Si el número es primo lo añadimos a la lista solución
     return result
     

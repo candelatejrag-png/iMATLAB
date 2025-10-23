@@ -18,7 +18,8 @@ import random
 
 
 def generar_claves(min_primo:int,max_primo:int)-> Tuple[int,int,int]:
-    """Toma dos primos entre min_primo (incluido) y max_primo (excluido) y devuelve
+    """
+    Toma dos primos entre min_primo (incluido) y max_primo (excluido) y devuelve
     n,e,d
     donde (n,e) es la clave pública y d la clave privada para RSA
 
@@ -35,13 +36,42 @@ def generar_claves(min_primo:int,max_primo:int)-> Tuple[int,int,int]:
     Raises:
         ValueError: Si no es posible encontrar una pareja de primos distintos p1,p2 entre min_primo y max_primo
     """
-    l_primos = m.lista_primos(min_primo, max_primo)
-    p1 = random.choice(l_primos)
-    p2 = random.choice(l_primos)
-    phi = (p1-1)*(p2-2)
-    return (p1*p2,3,m.inversa_mod_p(3,phi))
+    if min_primo < 2 or max_primo <= min_primo:
+        raise ValueError('rango de primos invalido')
+    
+    primos = m.lista_primos(min_primo, max_primo)
+    if len(primos) < 2:
+        raise ValueError('no hay suficientes primos en el rango')
 
-def aplicar_padding(m:int,digitos_padding:int)->int:
+    p1, p2 = random.sample(primos, 2) # en vez de usar random.choice() y luego un while, random.sample(poblacon, k) devuelve una lista de k elementos DISTINTOS de la poblacion en orden aleatorio
+    
+    n = p1 * p2
+
+    # elige e al azar con condiciones: 1 < e < m.euler(n), e impar, mcd(e, m.euler(n))=1
+    phi = (p1 - 1) * (p2 - 1)
+
+    # elegimos e
+    if phi <= 3:
+        if phi == 2:
+            raise RuntimeError('no existe exponente valido para phi(n)= 2, elige otros primos')
+        e = 2   # si phi = 3
+    else:
+        probados = set() #no podemos contar intentos porque random.randrange puede repetir vallores por lo que podria raise el error sin haber probado todos los impares
+        n_candidatos = len(range(3, phi,2))
+        while True: # intenta hasta encontrar un e valido
+            e = random.randrange(3, phi, 2) # devuelve un numero aleatorio en [3, phi) ,2 para que pruebe solo e impares
+            probados.add(e)
+            if m.mcd(e, phi) == 1:
+                break
+            probados += 1
+            if len(probados) == n_candidatos:
+                raise RuntimeError('no hemos encontrado e coprimo con phi(n), elige otros primos')
+
+    d = m.inversa_mod_p(e, phi)
+    return n, e, d
+
+
+def aplicar_padding(m:int,digitos_padding:int) -> int:
     """Dado un mensaje y un número de dígitos de padding, añade
     digitos_padding cifras aleatorias a la derecha del mensaje
     
@@ -61,7 +91,12 @@ def aplicar_padding(m:int,digitos_padding:int)->int:
         aplicar_padding(24,3)=24845
         aplicar_padding(24,0)=24
     """
-    pass
+    # asumimos que m >= 0 y digitos_padding >= 0 son precondiciones del comentario por Raises: None
+    if digitos_padding == 0:
+        return m
+    factor = 10 ** digitos_padding
+    r = random.randint(0, factor - 1) # genera un bloque aleatorio de 'digitos_padding' cifras 
+    return m * factor + r   # se desplaza el mensaje por el factor y se le añade el bloque aleatorio
 
 
 def eliminar_padding(m:int,digitos_padding:int)->int:
@@ -85,7 +120,10 @@ def eliminar_padding(m:int,digitos_padding:int)->int:
         eliminar_padding(2432,2)=24
         eliminar_padding(2432,0)=2432
     """
-    pass
+    if digitos_padding == 0:  # no hay cifras que eliminar
+        return m
+    factor = 10 ** digitos_padding
+    return m // factor # trunca las 'factor' cifras finales
 
 
 def cifrar_rsa(m:int,n:int,e:int,digitos_padding:int)->int:
@@ -105,7 +143,20 @@ def cifrar_rsa(m:int,n:int,e:int,digitos_padding:int)->int:
 
     Raises: None
     """
-    pass
+    # asumimos que m_pad >= n asi que no cazamos error?
+    m_pad = aplicar_padding(m, digitos_padding) # primero concatenamos las cifras aleatorias a la derecha del mensaje
+    factores = m.factorizar(n)
+    if len(factores) == 2 and all(exp == 1 for exp in factores.values()): # si solo tiene dos factores y son primos distintos
+        p1, p2 = factores.keys()
+        # calculo por separado en modulos pequeños en vez de hacerlo con n que es muy grande y mas costoso
+        c_p1 = m.potencia_mod_p(m_pad % p1, e, p1)
+        c_p2 = m.potencia_mod_p(m_pad % p2, e, p2)
+        inversa = m.inversa_mod_p(p2 % p1, p1)
+        h = ((c_p1 - c_p2) * inversa) % p1
+        c = c_p2 + p2 * h
+        return c
+    else: # si la factorizacion no es de la forma que buscamos, lo hacemos mod n
+        return m.potencia_mod_p(m_pad, e, n)
 
 
 def descifrar_rsa(c:int,n:int,d:int,digitos_padding:int)->int:
@@ -126,7 +177,22 @@ def descifrar_rsa(c:int,n:int,d:int,digitos_padding:int)->int:
 
     Raises: None
     """
-    pass
+    factores = m.factorizar(n) # factorizamos para probar con el TCR
+    if len(factores) == 2 and all(exp == 1 for exp in factores.values()):
+        p1, p2 = factores.keys()
+        # reducimos los exponentes -> reduce el coste de las potencias
+        d_p1 = d % (p1 - 1)
+        d_p2 = d % (p2 - 1)
+        # desciframos por separado
+        m_p1 = m.potencia_mod_p(c % p1, d_p1, p1)
+        m_p2 = m.potencia_mod_p(c % p2, d_p2, p2)
+        inversa = m.inversa_mod_p(p2 % p1, p1)
+        h = ((m_p1 - m_p2) * inversa) % p1
+        m_pad = m_p2 + p2 * h
+    else: # si la factorizacion no es de la forma que buscamos, lo hacemos directamente mod n
+        m_pad = m.potencia_mod_p(c, d, n)
+
+    return eliminar_padding(m_pad, digitos_padding)
 
 
 def codificar_cadena(s:str)->List[int]:
@@ -163,11 +229,16 @@ def decodificar_cadena(m:List[int])->str:
     Example:
         decodificar_cadena([161, 72, 111, 108, 97, 32, 109, 117, 110, 100, 111, 33])="¡Hola mundo!"
     """
+    for codigo in m:
+        if not (0 <= codigo <= 0x10FFFF): # 0x10FFFF es el maximo punto de codigo unicode permitido por estandar
+            raise ValueError(f'El codigo {codigo} esta fuera del rango Unicode')
+    
     return "".join(map(chr,m)) # aqui map(chr,m) es equivalente a decir -> chr(i) for i in m
 
 
 def cifrar_cadena_rsa(s:str,n:int,e:int,digitos_padding:int)->List[int]:
-    """Cifra carácter a carácter una cadena de caracteres usando RSA con clave púbica (n,e)
+    """
+    Cifra carácter a carácter una cadena de caracteres usando RSA con clave púbica (n,e)
     y digitos_padding cifras de padding al final del mensaje y devuelve la lista de enteros
     que representan el mensaje cifrado correspondiente.
     Args:
@@ -181,7 +252,12 @@ def cifrar_cadena_rsa(s:str,n:int,e:int,digitos_padding:int)->List[int]:
 
     Raises: None
     """
-    pass
+    cadena_cifrada = ""
+    for char in s:
+        char_ascii = ord(char)
+        char_cifrado = cifrar_rsa(char_ascii, n, e, digitos_padding)
+        cadena_cifrada.append(char_cifrado)
+    return cadena_cifrada
 
 
 def descifrar_cadena_rsa(cList:List[int],n:int,d:int,digitos_padding:int)->str:
@@ -199,7 +275,14 @@ def descifrar_cadena_rsa(cList:List[int],n:int,d:int,digitos_padding:int)->str:
     Raises:
         ValueError: Si, tras decodificar, alguno de los enteros del mensaje no representa un caracter unicode válido.    
     """
-    pass
+    #ERROR DE UNICODE
+    cadena_descifrada = ""
+    for c in cList:
+        char_ascii = descifrar_rsa(c, n, d, digitos_padding)
+        char = chr(char_ascii)
+        cadena_descifrada += char
+    return cadena_descifrada
+
 
 
 def romper_clave(n:int,e:int)->int:
@@ -216,7 +299,10 @@ def romper_clave(n:int,e:int)->int:
     Raises:
         ValueError: Si no existe ninguna clave privada d compatible con la clave pública (n,e).
     """
-    pass
+    phi = m.euler(n)
+    if m.mcd(e, phi) != 1:
+        raise ValueError('e y phi(n) no son coprimos por lo que no existe inversa')
+    return m.inversa_mod_p(e, phi)
 
 
 def ataque_texto_elegido(cList:List[int],n:int,e:int)->str:
@@ -234,4 +320,19 @@ def ataque_texto_elegido(cList:List[int],n:int,e:int)->str:
     Raises:
         ValueError: Si el mensaje no se corresponde con ningún texto plano que haya sido codificado con RSA sin padding.
     """
-    pass
+    # ERROR DE PADDING
+    phi = m.euler(n)
+    d = m.inversa_mod_p(e, phi)
+
+    texto_descifrado = ""
+    dic = {}
+    for num in cList: 
+        if num in dic:
+            texto_descifrado += dic[num]
+        else:
+            char_ascii = m.potencia_mod_p(num, d, n)
+            char = chr(char_ascii)
+            texto_descifrado += char
+            dic[num] = char
+
+    return texto_descifrado
