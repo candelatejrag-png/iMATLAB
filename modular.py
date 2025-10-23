@@ -55,7 +55,7 @@ def lista_primos(a:int, b:int) -> list[int]:
     if a >= b:
         return result                   # Si a >= b, devuelve [] vacio
     for x in range(max(2, a), b):       # Con max(2, a) evaluamos unicamente a partir del primer número primo positivo
-        if es_primo(x):
+        if posible_primos(x):
             result.append(x)            # Si el número es primo lo añadimos a la lista solución
     return result
     
@@ -473,3 +473,25 @@ def carmichael(n:int) -> int:
         
         lam = lam // mcd(lam, lam_pe) * lam_pe
     return lam
+
+def posible_primos(n: int) -> bool: 
+    if n < 2:                                       # El 2 es el primo positivo más pequeño
+        return False
+    if n in (2,3):
+        return True                                 # 2 es el único número primo par
+    if n % 2 == 0:
+        return False                                # Si es par y mayor que 2, no es primo
+    # Buscamos escribir n como 2^s*d + 1
+    d = n - 1
+    s = 0
+    while d%2 == 0: 
+        d //= 2
+        s += 1
+    x = potencia_mod_p(2, d, n)
+    if x == 1 or x == n-1: 
+        return True
+    for _ in range(s-1): 
+        x = potencia_mod_p(x, 2, n)
+        if x == n-1: 
+            return True
+    return False
