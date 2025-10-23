@@ -473,3 +473,19 @@ def carmichael(n:int) -> int:
         
         lam = lam // mcd(lam, lam_pe) * lam_pe
     return lam
+
+def posible_primos(n: int) -> bool: 
+    if n < 2:                                       # El 2 es el primo positivo más pequeño
+        return False
+    if n == 2:
+        return True                                 # 2 es el único número primo par
+    if n % 2 == 0:
+        return False                                # Si es par y mayor que 2, no es primo
+    # Buscamos escribir n como 2^s*d + 1
+    n = n - 1
+    d = n - 1
+    s = 0
+    while d%2 == 0: 
+        d //= 2
+        s += 1
+    return d, s
