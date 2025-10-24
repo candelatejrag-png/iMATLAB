@@ -1,5 +1,6 @@
 # importamos los scripts necesarios: 
 import errores as e
+import math
 
 # Creamos error necesario: 
 class IncompatibleEquationError(Exception): 
@@ -54,10 +55,18 @@ def lista_primos(a:int, b:int) -> list[int]:
     result = []
     if a >= b:
         return result                   # Si a >= b, devuelve [] vacio
+    largo = largo_lista(a,b)
     for x in range(max(2, a), b):       # Con max(2, a) evaluamos unicamente a partir del primer número primo positivo
-        if es_primo(x):
+        if posible_primos(x):
             result.append(x)            # Si el número es primo lo añadimos a la lista solución
+        if len(result) == largo: 
+            return result
     return result
+
+def largo_lista(a: int, b: int) -> int: 
+    if b <=1: 
+        return 0
+    return int((b/math.log10(b))-(a/math.log10(a))) if a > 1 else int((b/math.log10(b)))
     
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
