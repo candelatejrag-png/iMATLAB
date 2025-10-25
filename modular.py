@@ -483,7 +483,13 @@ def carmichael(n:int) -> int:
         lam = lam // mcd(lam, lam_pe) * lam_pe
     return lam
 
+'-------------------------------------------------------------------------------------------------------------------------------------'
+# Mejoras para la practica 2:
+# Con el fin de optimizar los algorítmos empleados en la práctica 2 se han implementado dos funciones: posible_primos y fcatorizar_cripto. 
+
+
 def posible_primos(n: int) -> bool: 
+    '''Función que evalúa si un número n es primo empleando el test de primaridad de Fermat. Este se basa en el pequeño teorema de Fermat. '''
     if n < 2:                                       # El 2 es el primo positivo más pequeño
         return False
     if n in (2,3):
@@ -504,3 +510,29 @@ def posible_primos(n: int) -> bool:
         if x == n-1: 
             return True
     return False
+
+def factorizar_cripto(n: int) -> list: 
+    '''Función que factoriza un número sabiendo que este es producto de dos primos enpleando el método de Factorización de Fermat. Primero, 
+    en el caso de que n sea par y, sabiendo que es producto de dos primos tendremos n = 2*d con d = n//2.Por otro lado, si n es impar buscaremos
+    su producto de primos representandolo como la diferencia de dos cuadrados. 
+    
+    Args: 
+        n (int): el número a factorizar. 
+    Returns: 
+        lista (list). lista con los primos que forman n. (Ya que sabemos la estructura de n no es necesario almacenar la información en un 
+        diccionario como se hace en la función de factorizar() ya que aquí sabemos que los primos que componen al número tienen exponente 1.)
+    '''
+    if n % 2 == 0:    # si n es par ya sabemos cuál será su factroización
+        return 2, n // 2
+                      # Si n es impar empleamos ek método de factorización de Fermat para encontrar el producto de primos
+    a = math.isqrt(n)
+    if a * a < n:
+        a += 1
+
+    while True:
+        b2 = a * a - n
+        b = math.isqrt(b2)
+        if b * b == b2:
+            # Encontramos la factorización
+            return a - b, a + b
+        a += 1
