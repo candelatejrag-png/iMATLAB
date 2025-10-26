@@ -53,7 +53,7 @@ def generar_claves(min_primo:int,max_primo:int)-> Tuple[int,int,int]:
     # elegimos e
     if phi <= 3:
         if phi == 2:
-            raise RuntimeError('no existe exponente valido para phi(n)= 2, elige otros primos')
+            raise RuntimeError('no existe exponente valido para phi(n)= 2')
         e = 2   # si phi = 3
     else:
         probados = set() #no podemos contar intentos porque random.randrange puede repetir valores por lo que podria raise el error sin haber probado todos los impares
@@ -65,7 +65,7 @@ def generar_claves(min_primo:int,max_primo:int)-> Tuple[int,int,int]:
                 break
             probados += 1
             if len(probados) == n_candidatos:
-                raise RuntimeError('no hemos encontrado e coprimo con phi(n), elige otros primos')
+                raise RuntimeError('no hemos encontrado e coprimo con phi(n)')
 
     d = m.inversa_mod_p(e, phi)
     return n, e, d
