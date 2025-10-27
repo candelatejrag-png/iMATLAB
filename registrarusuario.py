@@ -19,7 +19,7 @@ def almacenar(ruta_fichero: str, datos: list):
             fi.write(f'{dato}\n')
 
 if __name__ == '__main__': 
-
+ 
     # Comenzamos solicitandole al usuario la información necesaria.
     nombre = input('Un nombre: ')
     val_min = input('Introduzca el valor mínimo de cada primo usado para generar sus claves RSA: ')
@@ -28,12 +28,17 @@ if __name__ == '__main__':
     
     # Generamos las claves públicas y privada del usuario a partir de la información recogida capturando los posibles errores. 
     try:
-        pad = int(pad)    # Comprobamos que el dato recibido por pantalla es válido
+        pad = int(pad)                                # Comprobamos que el dato recibido por pantalla es válido
         n,e,d = map(str,f.generar_claves(int(val_min), int(val_max)))
+        
         # Guardamos la información en sus respectivos ficheros, todos dentro de la carpeta usuarios. 
         carpeta = Path('usuarios')
-        carpeta.mkdir(parents=True, exist_ok=True)    # Creamos, si no exsiste la carpeta, sino no salta error.  
-        almacenar(f'{carpeta}/pub_{nombre}.txt', [n,e,pad])
-        almacenar(f'{carpeta}/priv{nombre}.txt',[int(d)])
+        carpeta.mkdir(parents=True, exist_ok=True)    # Creamos, si no exsiste la carpeta.  
+        
+        # Almacenamos la información. 
+        almacenar(f'{carpeta}/pub_{nombre}.txt', [n,e,int(pad)])
+        almacenar(f'{carpeta}/priv_{nombre}.txt',[d])
+
+        print(f'El usuario {nombre} se ha registrado con éxito. ')
     except ValueError as error:  
         print(f'{error}, los números introducidos no son correctos. ')
