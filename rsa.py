@@ -63,7 +63,6 @@ def generar_claves(min_primo:int,max_primo:int)-> Tuple[int,int,int]:
             probados.add(e)
             if m.mcd(e, phi) == 1:
                 break
-            probados += 1
             if len(probados) == n_candidatos:
                 raise RuntimeError('no hemos encontrado e coprimo con phi(n)')
 
@@ -125,7 +124,6 @@ def eliminar_padding(m:int,digitos_padding:int)->int:
     factor = 10 ** digitos_padding
     return m // factor # trunca las 'factor' cifras finales
 
-
 def cifrar_rsa(m:int,n:int,e:int,digitos_padding:int)->int:
     """Dado un mensaje m entero, un módulo y exponente que formen parte
     de una clave pública de RSA, con m<n*10^{-digitos_padding}, y un número
@@ -143,18 +141,18 @@ def cifrar_rsa(m:int,n:int,e:int,digitos_padding:int)->int:
 
     Raises: None
     """
-    # asumimos que m_pad >= n asi que no cazamos error?
+    # asumimos que m_pad < n asi que no cazamos error?
     m_pad = aplicar_padding(m, digitos_padding) # primero concatenamos las cifras aleatorias a la derecha del mensaje
     factores = m.factorizar(n)
     if len(factores) == 2 and all(exp == 1 for exp in factores.values()): # si solo tiene dos factores y son primos distintos
         p1, p2 = factores.keys()
         # calculo por separado en modulos pequeños en vez de hacerlo con n que es muy grande y mas costoso
-        c_p1 = m.potencia_mod_p(m_pad % p1, e, p1)
-        c_p2 = m.potencia_mod_p(m_pad % p2, e, p2)
+        cifrado_p1 = m.potencia_mod_p(m_pad % p1, e, p1)
+        cifrado_p2 = m.potencia_mod_p(m_pad % p2, e, p2)
         inversa = m.inversa_mod_p(p2 % p1, p1)
-        h = ((c_p1 - c_p2) * inversa) % p1
-        c = c_p2 + p2 * h
-        return c
+        k = ((cifrado_p1 - cifrado_p2) * inversa) % p1
+        cifrado = cifrado_p2 + p2 * k
+        return cifrado
     else: # si la factorizacion no es de la forma que buscamos, lo hacemos mod n
         return m.potencia_mod_p(m_pad, e, n)
 
