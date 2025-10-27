@@ -29,13 +29,15 @@ def extraer_clave(nombre_fichero: str)-> list[int]:
         raise LecturaError(f'no se ha encontrado el archivo asociado al usuario {nombre_fichero}. Asegurese de que dicho usuario este registrado. ')
 
 def ac_cifrar(n: int, e: int, pad: int): 
-    # cifrar de parte de u1 para u2 -> necesito claves publicas de u2, n y e. 
     mensaje = input('introduzca el texto que desea cifrar: ')
     m_cifrado = f.cifrar_cadena_rsa(mensaje,n,e,pad)
     print(m_cifrado)
 
-def ac_descifrar(): 
-    pass
+def ac_descifrar(d: int, pad: int): 
+    m_cifrado = input('Introduzca mensaje que desea descifrar: ')
+    mensaje = f.descifrar_cadena_rsa(m_cifrado.split(' '))
+    print(mensaje)
+
 
 if __name__ == '__main__': 
 
