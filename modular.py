@@ -1,5 +1,6 @@
 # importamos los scripts necesarios: 
 import errores as e
+import math
 
 # Creamos error necesario: 
 class IncompatibleEquationError(Exception): 
@@ -54,10 +55,18 @@ def lista_primos(a:int, b:int) -> list[int]:
     result = []
     if a >= b:
         return result                   # Si a >= b, devuelve [] vacio
+    largo = largo_lista(a,b)
     for x in range(max(2, a), b):       # Con max(2, a) evaluamos unicamente a partir del primer número primo positivo
-        if es_primo(x):
+        if posible_primos(x):
             result.append(x)            # Si el número es primo lo añadimos a la lista solución
+        if len(result) == largo: 
+            return result
     return result
+
+def largo_lista(a: int, b: int) -> int: 
+    if b <=1: 
+        return 0
+    return int((b/math.log10(b))-(a/math.log10(a))) if a > 1 else int((b/math.log10(b)))
     
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
@@ -474,24 +483,62 @@ def carmichael(n:int) -> int:
         lam = lam // mcd(lam, lam_pe) * lam_pe
     return lam
 
+'-------------------------------------------------------------------------------------------------------------------------------------'
+# Mejoras para la practica 2:
+# Con el fin de optimizar los algorítmos empleados en la práctica 2 se han implementado dos funciones: posible_primos y fcatorizar_cripto. 
+
+
 def posible_primos(n: int) -> bool: 
-    if n < 2:                                       # El 2 es el primo positivo más pequeño
+    '''Función que evalúa si un número n es primo empleando el test de primaridad de Miller-Rabin. Este se basa en el pequeño teorema de Fermat
+    y en la propiedad que dice que si un número n es primo las únicas raíces cuadradas de 1 (mod n) son 1 (mod n) o -1 (mod n). 
+    
+    Args: 
+        n (int): número del que se va a evaluar su primaridad. 
+    Returns: 
+        _ (bool): se devuelve True si el número es primo y False de lo comtrario. 
+    '''
+    if n < 2:                 # El 2 es el primo positivo más pequeño
         return False
     if n in (2,3):
-        return True                                 # 2 es el único número primo par
+        return True           # 2 es el único número primo par
     if n % 2 == 0:
-        return False                                # Si es par y mayor que 2, no es primo
+        return False          # Si es par y mayor que 2, no es primo
     # Buscamos escribir n como 2^s*d + 1
     d = n - 1
     s = 0
-    while d%2 == 0: 
+    while d%2 == 0:           # eliminamos todos los factores de 2 posibles de d y actualizamos la s. 
         d //= 2
         s += 1
-    x = potencia_mod_p(2, d, n)
-    if x == 1 or x == n-1: 
+    x = potencia_mod_p(2, d, n) 
+    if x == 1 or x == n-1:    # Comprobamos si se cumple el Teorema, si es así el número es primo
         return True
-    for _ in range(s-1): 
+    for _ in range(s-1):      # Si no se cumple debemos comprobar toda la secuencia de números calculada
         x = potencia_mod_p(x, 2, n)
-        if x == n-1: 
+        if x == n-1:          # Si para algún número de la secuencia la congruencia es -1 se cumple la propiedad, n es primo
             return True
-    return False
+    return False              # Si no se cumple la propiedad para ningún número de la secuencia n no es primo
+
+def factorizar_cripto(n: int) -> list: 
+    '''Función que factoriza un número sabiendo que este es producto de dos primos enpleando el método de Factorización de Fermat. Primero, 
+    en el caso de que n sea par y, sabiendo que es producto de dos primos tendremos n = 2*d con d = n//2.Por otro lado, si n es impar buscaremos
+    su producto de primos representandolo como la diferencia de dos cuadrados. 
+    
+    Args: 
+        n (int): el número a factorizar. 
+    Returns: 
+        lista (list): lista con los primos que forman n. (Ya que sabemos la estructura de n no es necesario almacenar la información en un 
+        diccionario como se hace en la función de factorizar() ya que aquí sabemos que los primos que componen al número tienen exponente 1.)
+    '''
+    if n % 2 == 0:         # si n es par ya sabemos cuál será su factroización
+        return 2, n // 2
+                           # Si n es impar empleamos el método de factorización de Fermat para encontrar el producto de primos
+    x = math.isqrt(n)      # Obtenemos un primer valor de x
+    if x * x < n:
+        x += 1
+
+    while True:
+        y2 = x * x - n     # Obtenemos un primer valor de y
+        y = math.isqrt(y2)
+        if y * y == y2:    # Si se cumple la ecuación x^2 -y^2 = n hemos terminado
+            return x - y, x + y
+        x += 1
