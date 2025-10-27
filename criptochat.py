@@ -61,7 +61,7 @@ if __name__ == '__main__':
             if accion == cifrar: 
                 ac_cifrar(n2,e2,pad2)
             elif accion == descifrar: 
-                ac_descifrar()
+                ac_descifrar(d1,pad1)
             else: 
                 print('Esta acción no esta disponible, vuelva a intentarlo. ')
             accion = input('Introduzca la acción a realizar: cifrar (C), descifrar (D) o salir (S): ').upper()
