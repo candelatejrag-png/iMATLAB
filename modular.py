@@ -518,7 +518,7 @@ def posible_primos(n: int) -> bool:
             return True
     return False              # Si no se cumple la propiedad para ningún número de la secuencia n no es primo
 
-def factorizar_cripto(n: int) -> list: 
+def factorizar_cripto(n: int) -> tuple[int, int]:
     '''Función que factoriza un número sabiendo que este es producto de dos primos enpleando el método de Factorización de Fermat. Primero, 
     en el caso de que n sea par y, sabiendo que es producto de dos primos tendremos n = 2*d con d = n//2.Por otro lado, si n es impar buscaremos
     su producto de primos representandolo como la diferencia de dos cuadrados. 
@@ -542,3 +542,5 @@ def factorizar_cripto(n: int) -> list:
         if y * y == y2:    # Si se cumple la ecuación x^2 -y^2 = n hemos terminado
             return x - y, x + y
         x += 1
+
+        

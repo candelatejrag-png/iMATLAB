@@ -250,9 +250,9 @@ def cifrar_cadena_rsa(s:str,n:int,e:int,digitos_padding:int)->List[int]:
 
     Raises: None
     """
-    cadena_cifrada = ""
+    cadena_cifrada = []
     for char in s:
-        char_ascii = ord(char)
+        char_ascii = codificar_cadena(char)
         char_cifrado = cifrar_rsa(char_ascii, n, e, digitos_padding)
         cadena_cifrada.append(char_cifrado)
     return cadena_cifrada
@@ -277,10 +277,11 @@ def descifrar_cadena_rsa(cList:List[int],n:int,d:int,digitos_padding:int)->str:
     cadena_descifrada = ""
     for c in cList:
         char_ascii = descifrar_rsa(c, n, d, digitos_padding)
-        char = chr(char_ascii)
+        char = decodificar_cadena(char_ascii) # raise?????
         cadena_descifrada += char
     return cadena_descifrada
 
+# RAISE VALUE ERROR TRY EXCEPT EN DECODIFICAR PARA QUE LO CACHEE O MENSAJE EN LOS DOS?
 
 
 def romper_clave(n:int,e:int)->int:
