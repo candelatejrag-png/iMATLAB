@@ -250,7 +250,7 @@ def cifrar_cadena_rsa(s:str,n:int,e:int,digitos_padding:int)->List[int]:
 
     Raises: None
     """
-    cadena_cifrada = ""
+    cadena_cifrada = []
     for char in s:
         char_ascii = ord(char)
         char_cifrado = cifrar_rsa(char_ascii, n, e, digitos_padding)
