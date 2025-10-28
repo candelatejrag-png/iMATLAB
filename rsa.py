@@ -228,9 +228,9 @@ def cifrar_cadena_rsa(s:str,n:int,e:int,digitos_padding:int)->List[int]:
     Raises: None
     """
     cadena_cifrada = []
+    s = codificar_cadena(s)
     for char in s:
-        char_ascii = codificar_cadena(char)
-        char_cifrado = cifrar_rsa(char_ascii, n, e, digitos_padding)
+        char_cifrado = cifrar_rsa(char, n, e, digitos_padding)
         cadena_cifrada.append(char_cifrado)
     return cadena_cifrada
 
@@ -272,7 +272,8 @@ def romper_clave(n:int,e:int)->int:
     Raises:
         ValueError: Si no existe ninguna clave privada d compatible con la clave pública (n,e).
     """
-    phi = f.euler(n)
+    p,q = f.factorizar_cripto(n)
+    phi = (p-1)*(q-1)
     if f.mcd(e, phi) != 1:
         raise ValueError('e y phi(n) no son coprimos por lo que no existe inversa y no existe ninguna d compatible con (n, e)')
     return f.inversa_mod_p(e, phi)
@@ -294,7 +295,8 @@ def ataque_texto_elegido(cList:List[int],n:int,e:int)->str:
         ValueError: Si el mensaje no se corresponde con ningún texto plano que haya sido codificado con RSA sin padding.
     """
     # ERROR DE PADDING
-    phi = f.euler(n)
+    p,q = f.factorizar_cripto(n)
+    phi = (p-1)*(q-1)
     d = f.inversa_mod_p(e, phi)
 
     texto_descifrado = ""
@@ -325,4 +327,3 @@ def blablabla(c:int, p1:int, p2:int,  d:int, digitos_padding:int) -> int:
     h = ((m_p1 - m_p2) * inversa) % p1
     m_pad = m_p2 + p2 * h
     return eliminar_padding(m_pad, digitos_padding)
-
