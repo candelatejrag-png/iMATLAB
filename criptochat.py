@@ -31,12 +31,12 @@ def extraer_clave(nombre_fichero: str)-> list[int]:
 def ac_cifrar(n: int, e: int, pad: int): 
     mensaje = input('introduzca el texto que desea cifrar: ')
     m_cifrado = f.cifrar_cadena_rsa(mensaje,n,e,pad)
-    print(m_cifrado)
+    print(str(m_cifrado)[1:-1])
 
-def ac_descifrar(d: int, pad: int): 
+def ac_descifrar(n: int, d: int, pad: int): 
     m_cifrado = input('Introduzca mensaje que desea descifrar: ')
     try:
-        mensaje = f.descifrar_cadena_rsa(m_cifrado.split(' '))
+        mensaje = f.descifrar_cadena_rsa(m_cifrado.split(' '),n,d,pad)
         print(mensaje)
     except ValueError as error: 
         print(f'el mensaje no se ha podido descodificar con éxito ya que {error}')
@@ -64,7 +64,7 @@ if __name__ == '__main__':
             if accion == cifrar: 
                 ac_cifrar(n2,e2,pad2)
             elif accion == descifrar: 
-                ac_descifrar(d1,pad1)
+                ac_descifrar(n1,d1,pad1)
             else: 
                 print('Esta acción no esta disponible, vuelva a intentarlo. ')
             accion = input('Introduzca la acción a realizar: cifrar (C), descifrar (D) o salir (S): ').upper()
