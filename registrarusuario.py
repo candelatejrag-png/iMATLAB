@@ -41,4 +41,6 @@ if __name__ == '__main__':
 
         print(f'El usuario {nombre} se ha registrado con éxito. ')
     except ValueError as error:  
+        print('\n','-'*40,'ERROR','-'*40,'\n')
         print(f'{error}, los números introducidos no son correctos. ')
+        print('El usuario no se ha podido registrar. ')
