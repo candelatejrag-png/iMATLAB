@@ -35,8 +35,11 @@ def ac_cifrar(n: int, e: int, pad: int):
 
 def ac_descifrar(d: int, pad: int): 
     m_cifrado = input('Introduzca mensaje que desea descifrar: ')
-    mensaje = f.descifrar_cadena_rsa(m_cifrado.split(' '))
-    print(mensaje)
+    try:
+        mensaje = f.descifrar_cadena_rsa(m_cifrado.split(' '))
+        print(mensaje)
+    except ValueError as error: 
+        print(f'el mensaje no se ha podido descodificar con éxito ya que {error}')
 
 
 if __name__ == '__main__': 
