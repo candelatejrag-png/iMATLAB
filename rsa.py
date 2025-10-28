@@ -63,6 +63,7 @@ def generar_claves(min_primo:int,max_primo:int)-> Tuple[int,int,int]:
             probados.add(e)
             if f.mcd(e, phi) == 1:
                 break
+            # como no 
             if len(probados) == n_candidatos:
                 raise RuntimeError('no hemos encontrado e coprimo con phi(n)')
 
@@ -141,23 +142,11 @@ def cifrar_rsa(m:int,n:int,e:int,digitos_padding:int)->int:
 
     Raises: None
     """
-    # asumimos que m_pad < n asi que no cazamos error?
     m_pad = aplicar_padding(m, digitos_padding) # primero concatenamos las cifras aleatorias a la derecha del mensaje
-    factores = f.factorizar(n)
-    if len(factores) == 2 and all(exp == 1 for exp in factores.values()): # si solo tiene dos factores y son primos distintos
-        p1, p2 = factores.keys()
-        # calculo por separado en modulos pequeños en vez de hacerlo con n que es muy grande y mas costoso
-        cifrado_p1 = f.potencia_mod_p(m_pad % p1, e, p1)
-        cifrado_p2 = f.potencia_mod_p(m_pad % p2, e, p2)
-        inversa = f.inversa_mod_p(p2 % p1, p1)
-        k = ((cifrado_p1 - cifrado_p2) * inversa) % p1
-        cifrado = cifrado_p2 + p2 * k
-        return cifrado
-    else: # si la factorizacion no es de la forma que buscamos, lo hacemos mod n
-        return f.potencia_mod_p(m_pad, e, n)
 
+    return f.potencia_mod_p(m_pad, e, n) # m_cifrado = m_pad ** e (mod n)
 
-def descifrar_rsa(c:int,n:int,d:int,digitos_padding:int)->int:
+def descifrar_rsa(c:int, n:int, d:int, digitos_padding:int)->int:
     """Dado un cifrado c entero que haya sido cifrado con RSA usando
     digitos_padding cifras de padding al final del mensaje y el 
     módulo y exponente privado, n y d que formen la clave privada de RSA cuya pareja se
@@ -175,22 +164,9 @@ def descifrar_rsa(c:int,n:int,d:int,digitos_padding:int)->int:
 
     Raises: None
     """
-    factores = f.factorizar(n) # factorizamos para probar con el TCR
-    if len(factores) == 2 and all(exp == 1 for exp in factores.values()):
-        p1, p2 = factores.keys()
-        # reducimos los exponentes -> reduce el coste de las potencias
-        d_p1 = d % (p1 - 1)
-        d_p2 = d % (p2 - 1)
-        # desciframos por separado
-        m_p1 = f.potencia_mod_p(c % p1, d_p1, p1)
-        m_p2 = f.potencia_mod_p(c % p2, d_p2, p2)
-        inversa = f.inversa_mod_p(p2 % p1, p1)
-        h = ((m_p1 - m_p2) * inversa) % p1
-        m_pad = m_p2 + p2 * h
-    else: # si la factorizacion no es de la forma que buscamos, lo hacemos directamente mod n
-        m_pad = f.potencia_mod_p(c, d, n)
+    m_pad = f.potencia_mod_p(c, d, n) # m_descifrado = c ** d (mod n)
 
-    return eliminar_padding(m_pad, digitos_padding)
+    return eliminar_padding(m_pad, digitos_padding) # eliminamos padding
 
 
 def codificar_cadena(s:str)->List[int]:
@@ -208,7 +184,7 @@ def codificar_cadena(s:str)->List[int]:
     Example:
         codificar_cadena("¡Hola mundo!")=[161, 72, 111, 108, 97, 32, 109, 117, 110, 100, 111, 33]
     """
-    return list(ord(i) for i in s)
+    return [ord(i) for i in s]
 
 
 def decodificar_cadena(m:List[int])->str:
@@ -227,11 +203,12 @@ def decodificar_cadena(m:List[int])->str:
     Example:
         decodificar_cadena([161, 72, 111, 108, 97, 32, 109, 117, 110, 100, 111, 33])="¡Hola mundo!"
     """
-    for codigo in m:
-        if not (0 <= codigo <= 0x10FFFF): # 0x10FFFF es el maximo punto de codigo unicode permitido por estandar
-            raise ValueError(f'El codigo {codigo} esta fuera del rango Unicode')
-    
-    return "".join(map(chr,m)) # aqui map(chr,m) es equivalente a decir -> chr(i) for i in m
+    try:
+        chars = [chr(codigo) for codigo in m]
+    except ValueError:
+        raise (f'Alguno de los enteros no representa un caracter Unicode valido')
+
+    return "".join(chars) # une la lista en strings sin separaciones
 
 
 def cifrar_cadena_rsa(s:str,n:int,e:int,digitos_padding:int)->List[int]:
@@ -273,16 +250,13 @@ def descifrar_cadena_rsa(cList:List[int],n:int,d:int,digitos_padding:int)->str:
     Raises:
         ValueError: Si, tras decodificar, alguno de los enteros del mensaje no representa un caracter unicode válido.    
     """
-    #ERROR DE UNICODE
-    cadena_descifrada = ""
-    for c in cList:
-        char_ascii = descifrar_rsa(c, n, d, digitos_padding)
-        char = decodificar_cadena(char_ascii) # raise?????
-        cadena_descifrada += char
-    return cadena_descifrada
-
-# RAISE VALUE ERROR TRY EXCEPT EN DECODIFICAR PARA QUE LO CACHEE O MENSAJE EN LOS DOS?
-
+    chars_ascii = [descifrar_rsa(c, n, d, digitos_padding) for c in cList]
+    
+    try: # decodificar los enteros descifrados
+        return decodificar_cadena(chars_ascii)
+    except ValueError as error:
+        raise (error)
+    
 
 def romper_clave(n:int,e:int)->int:
     """A partir de una clave pública válida (n,e), recupera la clave privada d tal que
@@ -300,7 +274,7 @@ def romper_clave(n:int,e:int)->int:
     """
     phi = f.euler(n)
     if f.mcd(e, phi) != 1:
-        raise ValueError('e y phi(n) no son coprimos por lo que no existe inversa')
+        raise ValueError('e y phi(n) no son coprimos por lo que no existe inversa y no existe ninguna d compatible con (n, e)')
     return f.inversa_mod_p(e, phi)
 
 
@@ -335,3 +309,20 @@ def ataque_texto_elegido(cList:List[int],n:int,e:int)->str:
             dic[num] = char
 
     return texto_descifrado
+
+# ----------------- EXTRA -------------------
+def blablabla(c:int, p1:int, p2:int,  d:int, digitos_padding:int) -> int:
+    """
+    
+    """
+    # reducimos los exponentes -> reduce el coste de las potencias
+    d_p1 = d % (p1 - 1)
+    d_p2 = d % (p2 - 1)
+    # desciframos por separado
+    m_p1 = f.potencia_mod_p(c % p1, d_p1, p1)
+    m_p2 = f.potencia_mod_p(c % p2, d_p2, p2)
+    inversa = f.inversa_mod_p(p2 % p1, p1)
+    h = ((m_p1 - m_p2) * inversa) % p1
+    m_pad = m_p2 + p2 * h
+    return eliminar_padding(m_pad, digitos_padding)
+

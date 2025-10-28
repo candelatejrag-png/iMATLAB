@@ -499,26 +499,27 @@ def posible_primos(n: int) -> bool:
     '''
     if n < 2:                 # El 2 es el primo positivo más pequeño
         return False
-    if n in (2,3):
+    if n in (2, 3):
         return True           # 2 es el único número primo par
     if n % 2 == 0:
         return False          # Si es par y mayor que 2, no es primo
     # Buscamos escribir n como 2^s*d + 1
     d = n - 1
     s = 0
-    while d%2 == 0:           # eliminamos todos los factores de 2 posibles de d y actualizamos la s. 
+    while d % 2 == 0:           # eliminamos todos los factores de 2 posibles de d y actualizamos la s. 
         d //= 2
         s += 1
     x = potencia_mod_p(2, d, n) 
-    if x == 1 or x == n-1:    # Comprobamos si se cumple el Teorema, si es así el número es primo
+    if x == 1 or x == n - 1:    # Comprobamos si se cumple el Teorema, si es así el número es primo
         return True
-    for _ in range(s-1):      # Si no se cumple debemos comprobar toda la secuencia de números calculada
+    for _ in range(s - 1):      # Si no se cumple debemos comprobar toda la secuencia de números calculada
         x = potencia_mod_p(x, 2, n)
-        if x == n-1:          # Si para algún número de la secuencia la congruencia es -1 se cumple la propiedad, n es primo
+        if x == n - 1:          # Si para algún número de la secuencia la congruencia es -1 se cumple la propiedad, n es primo
             return True
     return False              # Si no se cumple la propiedad para ningún número de la secuencia n no es primo
 
 def factorizar_cripto(n: int) -> tuple[int, int]:
+    # mas optimo si los factores son cercanos entre si y cerca de sqrt(n)
     '''Función que factoriza un número sabiendo que este es producto de dos primos enpleando el método de Factorización de Fermat. Primero, 
     en el caso de que n sea par y, sabiendo que es producto de dos primos tendremos n = 2*d con d = n//2.Por otro lado, si n es impar buscaremos
     su producto de primos representandolo como la diferencia de dos cuadrados. 
@@ -542,5 +543,40 @@ def factorizar_cripto(n: int) -> tuple[int, int]:
         if y * y == y2:    # Si se cumple la ecuación x^2 -y^2 = n hemos terminado
             return x - y, x + y
         x += 1
+
+def factorizar_cripto_2(n:int) -> tuple[int, int]: 
+    # mas optimo si los factores no son cercanos entre si
+    """
+    Factorizamos n suponiendo que es semiprimo: n = p1 * p2 con p1, p2 primos
+    Empieza a buscar divisores en suelo(sqrt(n)) y desciende (solo checkeando impares)
+    Devuelve (p1, p2) con p1 <= p2 en cuanto encuentra un divisor
+
+    Si n es par, devuelve (2, n // 2)
+    Si n es un cuadrado perfecto, devuelve (sqrt(n), sqrt(n))
+    Lanza ValueError si no encuentra divisor > 1: n es primo o no semiprimo
+    """
+
+    if n % 2 == 0: # 2 * p2 (p2 primo impar)
+        return 2, n // 2
+    
+    # chequeamos si es cuadrado perfecto
+    r = int(n ** 0.5)
+    if r * r == n:
+        return (r, r)
+
+    # empezamos desde suelo(sqrt(n)) y bajamos por impares buscando los primos
+    if r % 2 == 1:
+        factor = r
+    else:
+        factor = r - 1
+    
+    while factor >= 3:
+        if n % factor == 0: # f y n|f factores
+            p1, p2 = factor, n // factor
+            if p1 > p2:
+                p1, p2 = p2, p1
+            return (p1, p2)
+        factor -= 2 # solo impares
+
 
         
