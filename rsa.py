@@ -293,36 +293,66 @@ def ataque_texto_elegido(cList:List[int],n:int,e:int)->str:
     Raises:
         ValueError: Si el mensaje no se corresponde con ningún texto plano que haya sido codificado con RSA sin padding.
     """
-    # ERROR DE PADDING
     phi = f.euler(n)
     d = f.inversa_mod_p(e, phi)
 
     texto_descifrado = ""
     dic = {}
     for num in cList: 
-        if num in dic:
-            texto_descifrado += dic[num]
+        if num in dic: # si ya he trabajado con ese codigo puedo devolver directamente su caracter
+            char= dic[num]
         else:
             char_ascii = f.potencia_mod_p(num, d, n)
-            char = chr(char_ascii)
-            texto_descifrado += char
-            dic[num] = char
-
+            try:
+                char = decodificar_cadena([char_ascii])
+            except ValueError as error:
+                raise ValueError(f'Codigo Unicode invalido {char_ascii} obtenido de {num}') from error
+            dic[num] = char # me voy guardando {codigo: caracter} para optimizar
+        texto_descifrado += char
     return texto_descifrado
 
 # ----------------- EXTRA -------------------
-def blablabla(c:int, p1:int, p2:int,  d:int, digitos_padding:int) -> int:
+def ataque_primos(c:int, p1:int, p2:int, n:int, e:int, cList:List[int], digitos_padding:int) -> int:
     """
-    
+    Descifra una lista de cifrados usando TCR dado que conocemos los factores p1, p2 de n
+    Para cada c en cList:
+        - reduce exponentes d_p1 = d mod (p1 - 1)
+        - calcula m_p1 = c ** d_p1 (mod p1)
+        - recombina barato: k = (m_p1 - m_p2) * (p2 ** -1 mod p1) (mod p1)
+        - m_pad = m_p2 + p2 * k
+        - m = eliminar_padding(m_pad, digitos_padding)
+    Devuelve la cadena decodificada 
+    Raises:
+        ValueError si alguno de los enteros recuperados no representa un caracter Unicode valido
     """
+    phi = f.euler(n)
+    d = f.inversa_mod_p(e, phi)
     # reducimos los exponentes -> reduce el coste de las potencias
     d_p1 = d % (p1 - 1)
     d_p2 = d % (p2 - 1)
+
+    inversa = f.inversa_mod_p(p2 % p1, p1) # debe existir: p1, p2 primos
+
+    texto_descifrado = ""
+    dic = {}
     # desciframos por separado
     m_p1 = f.potencia_mod_p(c % p1, d_p1, p1)
     m_p2 = f.potencia_mod_p(c % p2, d_p2, p2)
-    inversa = f.inversa_mod_p(p2 % p1, p1)
+    
     h = ((m_p1 - m_p2) * inversa) % p1
     m_pad = m_p2 + p2 * h
     return eliminar_padding(m_pad, digitos_padding)
 
+
+    for num in cList: 
+        if num in dic: # si ya he trabajado con ese codigo puedo devolver directamente su caracter
+            char= dic[num]
+        else:
+            char_ascii = f.potencia_mod_p(num, d, n)
+            try:
+                char = decodificar_cadena([char_ascii])
+            except ValueError as error:
+                raise ValueError(f'Codigo Unicode invalido {char_ascii} obtenido de {num}') from error
+            dic[num] = char # me voy guardando {codigo: caracter} para optimizar
+        texto_descifrado += char
+    return texto_descifrado
