@@ -577,6 +577,4 @@ def factorizar_cripto_2(n:int) -> tuple[int, int]:
                 p1, p2 = p2, p1
             return (p1, p2)
         factor -= 2 # solo impares
-
-
         
