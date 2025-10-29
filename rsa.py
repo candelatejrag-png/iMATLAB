@@ -227,12 +227,9 @@ def cifrar_cadena_rsa(s:str,n:int,e:int,digitos_padding:int)->List[int]:
 
     Raises: None
     """
-    cadena_cifrada = []
-    s = codificar_cadena(s)
-    for char in s:
-        char_cifrado = cifrar_rsa(char, n, e, digitos_padding)
-        cadena_cifrada.append(char_cifrado)
-    return cadena_cifrada
+    
+    codigos = codificar_cadena(s)
+    return [cifrar_rsa(m, n, e, digitos_padding) for m in codigos]
 
 
 def descifrar_cadena_rsa(cList:List[int],n:int,d:int,digitos_padding:int)->str:
@@ -316,7 +313,7 @@ def ataque_texto_elegido(cList:List[int],n:int,e:int) -> str:
     
 
 # ----------------- EXTRA -------------------
-def ataque_primos(p1:int, p2:int, e:int, cList:List[int], digitos_padding:int) -> str:
+def ataque_texto_padding(n:int, e:int, cList:List[int], digitos_padding:int) -> str:
     """
     Descifra una lista de cifrados (con padding) usando TCR dado que conocemos los factores p1, p2 de n
     Para cada c en cList:
@@ -330,7 +327,7 @@ def ataque_primos(p1:int, p2:int, e:int, cList:List[int], digitos_padding:int) -
         ValueError si alguno de los enteros recuperados no representa un caracter Unicode valido
     """
     # si nos hubieran dado n podriamos haber hecho: p1, p2 = f.factorizar_cripto(n) 
-
+    p1, p2 = f.factorizar_cripto(n)
     phi = (p1 - 1) * (p2 - 1)
     d = f.inversa_mod_p(e, phi)
 
@@ -342,24 +339,18 @@ def ataque_primos(p1:int, p2:int, e:int, cList:List[int], digitos_padding:int) -
     inversa = f.inversa_mod_p(p2 % p1, p1) 
 
     codigos = []
-    dic = {}
     for num in cList: 
-        if num in dic: ####
-            codigos.append(dic[num])
-        else:
-            # desciframos por separado -> potencias reducidas modulo p1 y p2
-            m_p1 = f.potencia_mod_p(num % p1, d_p1, p1)
-            m_p2 = f.potencia_mod_p(num % p2, d_p2, p2)
-            # recombinamos
-            h = ((m_p1 - m_p2) * inversa) % p1
-            m_pad = m_p2 + p2 * h
-            # eliminamos padding
-            m = eliminar_padding(m_pad, digitos_padding)
-            dic[num] = m
-            codigos.append(m)
-            # decodificamos toda la lista de una vez -> mas eficiente
+        # desciframos por separado -> potencias reducidas modulo p1 y p2
+        m_p1 = f.potencia_mod_p(num % p1, d_p1, p1)
+        m_p2 = f.potencia_mod_p(num % p2, d_p2, p2)
+        # recombinamos
+        h = ((m_p1 - m_p2) * inversa) % p1
+        m_pad = m_p2 + p2 * h
+        # eliminamos padding
+        m = eliminar_padding(m_pad, digitos_padding)
+        codigos.append(m)
+        # decodificamos toda la lista de una vez -> mas eficiente
     try:
         return decodificar_cadena(codigos)
     except ValueError as error:
         raise ValueError(f'Alguno de los enteros recuperados no representa un carácter Unicode valido') from error
-
