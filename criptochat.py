@@ -24,7 +24,7 @@ def extraer_clave(nombre_fichero: str)-> list[int]:
     try: 
         with open(f'usuarios/{nombre_fichero}.txt','r',encoding='utf-8') as fi: 
             datos = [int(linea.strip()) for linea in fi]
-        return datos
+        return datos if len(datos) > 1 else datos[0]
     except FileNotFoundError: 
         raise LecturaError(f'no se ha encontrado el archivo asociado al usuario {nombre_fichero}. Asegurese de que dicho usuario este registrado. ')
 
@@ -36,7 +36,7 @@ def ac_cifrar(n: int, e: int, pad: int):
 def ac_descifrar(n: int, d: int, pad: int): 
     m_cifrado = input('Introduzca mensaje que desea descifrar: ')
     try:
-        mensaje = f.descifrar_cadena_rsa(m_cifrado.split(' '),n,d,pad)
+        mensaje = f.descifrar_cadena_rsa(map(int,m_cifrado.split(' ')),n,d,pad)
         print(mensaje)
     except ValueError as error: 
         print(f'el mensaje no se ha podido descodificar con éxito ya que {error}')
