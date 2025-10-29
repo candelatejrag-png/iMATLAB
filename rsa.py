@@ -51,21 +51,13 @@ def generar_claves(min_primo:int,max_primo:int)-> Tuple[int,int,int]:
     phi = (p1 - 1) * (p2 - 1)
 
     # elegimos e
-    if phi <= 3:
-        if phi == 2:
-            raise RuntimeError('no existe exponente valido para phi(n)= 2')
-        e = 2   # si phi = 3
-    else:
-        probados = set() #no podemos contar intentos porque random.randrange puede repetir valores por lo que podria raise el error sin haber probado todos los impares
-        n_candidatos = len(range(3, phi,2))
-        while True: # intenta hasta encontrar un e valido
-            e = random.randrange(3, phi, 2) # devuelve un numero aleatorio en [3, phi) ,2 para que pruebe solo e impares
-            probados.add(e)
-            if f.mcd(e, phi) == 1:
-                break
-            # como no 
-            if len(probados) == n_candidatos:
-                raise RuntimeError('no hemos encontrado e coprimo con phi(n)')
+    e = random.randint(2, phi - 1)
+    valido = False
+    while not valido:
+        if f.mcd(e, phi) == 1:
+            break
+        else:
+            e = random.randint(2, phi - 1)
 
     d = f.inversa_mod_p(e, phi)
     return n, e, d
@@ -125,6 +117,7 @@ def eliminar_padding(m:int,digitos_padding:int)->int:
     factor = 10 ** digitos_padding
     return m // factor # trunca las 'factor' cifras finales
 
+
 def cifrar_rsa(m:int,n:int,e:int,digitos_padding:int)->int:
     """Dado un mensaje m entero, un módulo y exponente que formen parte
     de una clave pública de RSA, con m<n*10^{-digitos_padding}, y un número
@@ -145,6 +138,7 @@ def cifrar_rsa(m:int,n:int,e:int,digitos_padding:int)->int:
     m_pad = aplicar_padding(m, digitos_padding) # primero concatenamos las cifras aleatorias a la derecha del mensaje
 
     return f.potencia_mod_p(m_pad, e, n) # m_cifrado = m_pad ** e (mod n)
+
 
 def descifrar_rsa(c:int, n:int, d:int, digitos_padding:int)->int:
     """Dado un cifrado c entero que haya sido cifrado con RSA usando
@@ -227,12 +221,8 @@ def cifrar_cadena_rsa(s:str,n:int,e:int,digitos_padding:int)->List[int]:
 
     Raises: None
     """
-    cadena_cifrada = []
-    s = codificar_cadena(s)
-    for char in s:
-        char_cifrado = cifrar_rsa(char, n, e, digitos_padding)
-        cadena_cifrada.append(char_cifrado)
-    return cadena_cifrada
+    codigos = codificar_cadena(s)
+    return [cifrar_rsa(m, n, e, digitos_padding) for m in codigos]
 
 
 def descifrar_cadena_rsa(cList:List[int],n:int,d:int,digitos_padding:int)->str:
@@ -272,14 +262,14 @@ def romper_clave(n:int,e:int)->int:
     Raises:
         ValueError: Si no existe ninguna clave privada d compatible con la clave pública (n,e).
     """
-    p,q = f.factorizar_cripto(n)
-    phi = (p-1)*(q-1)
+    p1, p2 = f.factorizar_cripto(n)
+    phi = (p1 - 1) * (p2 - 1)
     if f.mcd(e, phi) != 1:
         raise ValueError('e y phi(n) no son coprimos por lo que no existe inversa y no existe ninguna d compatible con (n, e)')
     return f.inversa_mod_p(e, phi)
 
 
-def ataque_texto_elegido(cList:List[int],n:int,e:int)->str:
+def ataque_texto_elegido(cList:List[int],n:int,e:int) -> str:
     """Ejecuta un ataque de texto claro elegido sobre un mensaje que ha sido cifrado
     con RSA plano sin usar padding a partir de su clave pública.
 
@@ -294,36 +284,58 @@ def ataque_texto_elegido(cList:List[int],n:int,e:int)->str:
     Raises:
         ValueError: Si el mensaje no se corresponde con ningún texto plano que haya sido codificado con RSA sin padding.
     """
-    # ERROR DE PADDING
-    p,q = f.factorizar_cripto(n)
-    phi = (p-1)*(q-1)
+    # d = romper_clave(n, e) esto puede ser muy costoso y los 256 elementos ya nos permiten descifrar el texto elegido
+    dic_tabla_ascii = {}
+    for i in range(256):
+        dic_tabla_ascii[cifrar_rsa(i, n, e, 0)] = chr(i)
+
+    mensaje = ""
+    for num in cList: 
+        if num in dic_tabla_ascii: # si el descifrado del codigo esta en el diccionario, lo añadimo directamente al mensaje
+            mensaje += dic_tabla_ascii[num]
+        else: # codigo no encontrado en el diccionario
+            raise ValueError('EL mensaje no corresponde con ningun texto plano que haya sido codificado con RSA sin padding')
+    return mensaje
+
+# ----------------- OPCIONAL -------------------
+def ataque_texto_padding(n:int, e:int, cList:List[int], digitos_padding:int) -> str:
+    """
+    Descifra una lista de cifrados (con padding) usando TCR dado que conocemos los factores p1, p2 de n
+    Para cada c en cList:
+        - reduce exponentes d_p1 = d mod (p1 - 1)
+        - calcula m_p1 = c ** d_p1 (mod p1)
+        - recombina barato: k = (m_p1 - m_p2) * (p2 ** -1 mod p1) (mod p1)
+        - m_pad = m_p2 + p2 * k
+        - m = eliminar_padding(m_pad, digitos_padding)
+    Devuelve la cadena decodificada 
+    Raises:
+        ValueError si alguno de los enteros recuperados no representa un caracter Unicode valido
+    """
+    # si nos hubieran dado n podriamos haber hecho: p1, p2 = f.factorizar_cripto(n) 
+    p1, p2 = f.factorizar_cripto(n)
+    phi = (p1 - 1) * (p2 - 1)
     d = f.inversa_mod_p(e, phi)
 
-    texto_descifrado = ""
-    dic = {}
-    for num in cList: 
-        if num in dic:
-            texto_descifrado += dic[num]
-        else:
-            char_ascii = f.potencia_mod_p(num, d, n)
-            char = chr(char_ascii)
-            texto_descifrado += char
-            dic[num] = char
-
-    return texto_descifrado
-
-# ----------------- EXTRA -------------------
-def blablabla(c:int, p1:int, p2:int,  d:int, digitos_padding:int) -> int:
-    """
-    
-    """
     # reducimos los exponentes -> reduce el coste de las potencias
     d_p1 = d % (p1 - 1)
     d_p2 = d % (p2 - 1)
-    # desciframos por separado
-    m_p1 = f.potencia_mod_p(c % p1, d_p1, p1)
-    m_p2 = f.potencia_mod_p(c % p2, d_p2, p2)
-    inversa = f.inversa_mod_p(p2 % p1, p1)
-    h = ((m_p1 - m_p2) * inversa) % p1
-    m_pad = m_p2 + p2 * h
-    return eliminar_padding(m_pad, digitos_padding)
+
+    # calculamos inversa para luego recombinar
+    inversa = f.inversa_mod_p(p2 % p1, p1) 
+
+    codigos = []
+    for num in cList: 
+        # desciframos por separado -> potencias reducidas modulo p1 y p2
+        m_p1 = f.potencia_mod_p(num % p1, d_p1, p1)
+        m_p2 = f.potencia_mod_p(num % p2, d_p2, p2)
+        # recombinamos
+        h = ((m_p1 - m_p2) * inversa) % p1
+        m_pad = m_p2 + p2 * h
+        # eliminamos padding
+        m = eliminar_padding(m_pad, digitos_padding)
+        codigos.append(m)
+        # decodificamos toda la lista de una vez -> mas eficiente
+    try:
+        return decodificar_cadena(codigos)
+    except ValueError as error:
+        raise ValueError(f'Alguno de los enteros recuperados no representa un carácter Unicode valido') from error
