@@ -30,7 +30,7 @@ def extraer_clave(nombre_fichero: str)-> list[int]:
 
 def ac_cifrar(n: int, e: int, pad: int): 
     '''Función que ejecuta una le las acciones del programa, pide que el usuario introduzca un mensaje por pantalla y empleando las funciones auxiliares
-    del módulo rsa.py y los argumentos recibimos por pantalla cifra ese mensaje imprimiendo el nuevo mensaje cifrado. 
+    del módulo rsa.py y los argumentos recibidos por pantalla cifra ese mensaje imprimiendo el nuevo mensaje cifrado. 
     
     Args: 
         n (int): parte de la clave pública del usuario al que se le quiere mandar el mensaje (el módulo en la operación a realizar). 
@@ -45,7 +45,18 @@ def ac_cifrar(n: int, e: int, pad: int):
     m_cifrado = f.cifrar_cadena_rsa(mensaje,n,e,pad)
     print(str(m_cifrado)[1:-1])
 
-def ac_descifrar(n: int, d: int, pad: int): 
+def ac_descifrar(n: int, d: int, pad: int):
+    '''Función que ejecuta una le las acciones del programa, pide que el usuario introduzca un mensaje cifrado por pantalla y empleando las funciones auxiliares
+    del módulo rsa.py y los argumentos recibidos por pantalla descifra ese mensaje imprimiendo la cadena solución resultante. 
+    
+    Args: 
+        n (int): parte de la clave pública del usuario que ha recibido el mensaje cifrado (el módulo en la operación a realizar). 
+        e (int): parte de la clave pública del usuario que ha recibido el mensaje cifrado (el exponente en la operación a realizar). 
+        pad (int): el número de cifras de padding previamente escojido por el usuario receptor del mensaje que debe incluir la cadena solución. 
+    Returns: 
+        None. 
+    Raises: 
+        None.''' 
     m_cifrado = input('Introduzca mensaje que desea descifrar: ')
     try:
         mensaje = f.descifrar_cadena_rsa(map(int,m_cifrado.split(' ')),n,d,pad)
@@ -56,10 +67,12 @@ def ac_descifrar(n: int, d: int, pad: int):
 def main(usuario1: str, usuario2: str): 
     '''Función encargada de realizar el programa principal de chriptochat.py. 
     
-    args: 
+    Args: 
         usuario1 (str): el que abre la interfaz para comunicarse o leer mensajes de otro usuario. 
         usuario2 (str): el usuario con el que se quiere comunicar usuario1, el que recibirá un mensaje cifrado o del que se descodificará
-        un mensaje. 
+        un mensaje.
+    Returns: 
+        None.  
     Raises: 
         None
     '''
