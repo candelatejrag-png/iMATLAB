@@ -29,6 +29,18 @@ def extraer_clave(nombre_fichero: str)-> list[int]:
         raise LecturaError(f'no se ha encontrado el archivo asociado al usuario {nombre_fichero}. Asegurese de que dicho usuario este registrado. ')
 
 def ac_cifrar(n: int, e: int, pad: int): 
+    '''Función que ejecuta una le las acciones del programa, pide que el usuario introduzca un mensaje por pantalla y empleando las funciones auxiliares
+    del módulo rsa.py y los argumentos recibimos por pantalla cifra ese mensaje imprimiendo el nuevo mensaje cifrado. 
+    
+    Args: 
+        n (int): parte de la clave pública del usuario al que se le quiere mandar el mensaje (el módulo en la operación a realizar). 
+        e (int): parte de la clave pública del usuario al que se le quiere mandar el mensaje (el exponente en la operación a realizar). 
+        pad (int): el número de cifras de padding previamente escojido por el usuario receptor del mensaje que debe incluir la cadena solución. 
+    Returns: 
+        None. 
+    Raises: 
+        None. 
+    '''
     mensaje = input('introduzca el texto que desea cifrar: ')
     m_cifrado = f.cifrar_cadena_rsa(mensaje,n,e,pad)
     print(str(m_cifrado)[1:-1])
@@ -41,17 +53,16 @@ def ac_descifrar(n: int, d: int, pad: int):
     except ValueError as error: 
         print(f'el mensaje no se ha podido descodificar con éxito ya que {error}')
 
-
-if __name__ == '__main__': 
-
-    # Creamos las variables mecesarias. 
-    cifrar = 'C'
-    descifrar = 'D'
-    salir = 'S'
-
-    # Guardamos el nombre de los usuarios involucrados en el chat.
-    usuario1,usuario2 = sys.argv[1],sys.argv[2]
+def main(usuario1: str, usuario2: str): 
+    '''Función encargada de realizar el programa principal de chriptochat.py. 
     
+    args: 
+        usuario1 (str): el que abre la interfaz para comunicarse o leer mensajes de otro usuario. 
+        usuario2 (str): el usuario con el que se quiere comunicar usuario1, el que recibirá un mensaje cifrado o del que se descodificará
+        un mensaje. 
+    Raises: 
+        None
+    '''
     # Extraemos las claves publicas y privadas de usuario1 y las claves púclicas de usuario2 si estos exsisten, sino gestionamos el error. 
     try:
         n1, e1, pad1 = extraer_clave(f'pub_{usuario1}')
@@ -59,7 +70,7 @@ if __name__ == '__main__':
         n2,e2,pad2 = extraer_clave(f'pub_{usuario2}')
 
         # Abrimos el chat: 
-        accion = input('Introduzca la acción a realizar: cifrar (C), descifrar (D) o salir (S)').upper()
+        accion = input('Introduzca la acción a realizar: cifrar (C), descifrar (D) o salir (S): ').upper()
         while accion != salir: 
             if accion == cifrar: 
                 ac_cifrar(n2,e2,pad2)
@@ -70,5 +81,18 @@ if __name__ == '__main__':
             accion = input('Introduzca la acción a realizar: cifrar (C), descifrar (D) o salir (S): ').upper()
     except LecturaError as error: 
         print(error)
+
+if __name__ == '__main__': 
+
+    # Creamos las variables mecesarias. 
+    cifrar = 'C'
+    descifrar = 'D'
+    salir = 'S'
+
+    # Validamos y guardamos el nombre de los usuarios involucrados en el chat.
+    if len(sys.argv) == 3:
+        main(sys.argv[1],sys.argv[2])
+    else: 
+        print(f'No se ha introducido un número de usuarios adecuado. se deben introducir 2 nombres de usuario cuándo se han introducido {len(sys.argv)}. ')
     
     print('se ha salido del programa. ')
