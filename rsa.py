@@ -43,7 +43,7 @@ def generar_claves(min_primo:int,max_primo:int)-> Tuple[int,int,int]:
     if len(primos) < 2:
         raise ValueError('no hay suficientes primos en el rango')
 
-    p1, p2 = random.sample(primos, 2) # en vez de usar random.choice() y luego un while, random.sample(poblacon, k) devuelve una lista de k elementos DISTINTOS de la poblacion en orden aleatorio
+    p1, p2 = random.sample(primos, 2)   # en vez de usar random.choice() y luego un while, random.sample(poblacon, k) devuelve una lista de k elementos DISTINTOS de la poblacion en orden aleatorio
     
     n = p1 * p2
 
@@ -87,8 +87,8 @@ def aplicar_padding(m:int,digitos_padding:int) -> int:
     if digitos_padding == 0:
         return m
     factor = 10 ** digitos_padding
-    r = random.randint(0, factor - 1) # genera un bloque aleatorio de 'digitos_padding' cifras 
-    return m * factor + r   # se desplaza el mensaje por el factor y se le añade el bloque aleatorio
+    r = random.randint(0, factor - 1)   # genera un bloque aleatorio de 'digitos_padding' cifras 
+    return m * factor + r               # se desplaza el mensaje por el factor y se le añade el bloque aleatorio
 
 
 def eliminar_padding(m:int,digitos_padding:int)->int:
@@ -112,10 +112,10 @@ def eliminar_padding(m:int,digitos_padding:int)->int:
         eliminar_padding(2432,2)=24
         eliminar_padding(2432,0)=2432
     """
-    if digitos_padding == 0:  # no hay cifras que eliminar
+    if digitos_padding == 0:   # no hay cifras que eliminar
         return m
     factor = 10 ** digitos_padding
-    return m // factor # trunca las 'factor' cifras finales
+    return m // factor         # trunca las 'factor' cifras finales
 
 
 def cifrar_rsa(m:int,n:int,e:int,digitos_padding:int)->int:
@@ -135,9 +135,9 @@ def cifrar_rsa(m:int,n:int,e:int,digitos_padding:int)->int:
 
     Raises: None
     """
-    m_pad = aplicar_padding(m, digitos_padding) # primero concatenamos las cifras aleatorias a la derecha del mensaje
+    m_pad = aplicar_padding(m, digitos_padding)     # primero concatenamos las cifras aleatorias a la derecha del mensaje
 
-    return f.potencia_mod_p(m_pad, e, n) # m_cifrado = m_pad ** e (mod n)
+    return f.potencia_mod_p(m_pad, e, n)            # m_cifrado = m_pad ** e (mod n)
 
 
 def descifrar_rsa(c:int, n:int, d:int, digitos_padding:int)->int:
@@ -158,9 +158,9 @@ def descifrar_rsa(c:int, n:int, d:int, digitos_padding:int)->int:
 
     Raises: None
     """
-    m_pad = f.potencia_mod_p(c, d, n) # m_descifrado = c ** d (mod n)
+    m_pad = f.potencia_mod_p(c, d, n)                   # m_descifrado = c ** d (mod n)
 
-    return eliminar_padding(m_pad, digitos_padding) # eliminamos padding
+    return eliminar_padding(m_pad, digitos_padding)     # eliminamos padding
 
 
 def codificar_cadena(s:str)->List[int]:
@@ -202,7 +202,7 @@ def decodificar_cadena(m:List[int])->str:
     except ValueError:
         raise (f'Alguno de los enteros no representa un caracter Unicode valido')
 
-    return "".join(chars) # une la lista en strings sin separaciones
+    return "".join(chars)   # une la lista en strings sin separaciones
 
 
 def cifrar_cadena_rsa(s:str,n:int,e:int,digitos_padding:int)->List[int]:
@@ -242,7 +242,7 @@ def descifrar_cadena_rsa(cList:List[int],n:int,d:int,digitos_padding:int)->str:
     """
     chars_ascii = [descifrar_rsa(c, n, d, digitos_padding) for c in cList]
     
-    try: # decodificar los enteros descifrados
+    try:    # decodificar los enteros descifrados
         return decodificar_cadena(chars_ascii)
     except ValueError as error:
         raise (error)
@@ -291,9 +291,9 @@ def ataque_texto_elegido(cList:List[int],n:int,e:int) -> str:
 
     mensaje = ""
     for num in cList: 
-        if num in dic_tabla_ascii: # si el descifrado del codigo esta en el diccionario, lo añadimo directamente al mensaje
+        if num in dic_tabla_ascii:     # si el descifrado del codigo esta en el diccionario, lo añadimo directamente al mensaje
             mensaje += dic_tabla_ascii[num]
-        else: # codigo no encontrado en el diccionario
+        else:                          # codigo no encontrado en el diccionario
             raise ValueError('EL mensaje no corresponde con ningun texto plano que haya sido codificado con RSA sin padding')
     return mensaje
 
