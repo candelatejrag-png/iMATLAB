@@ -300,18 +300,15 @@ def inversa_mod_p(n:int, p:int) -> int:
         n (int): entero cuyo inverso modular se busca
         p (int): módulo (positivo)
     Returns:
-        (int): inverso de n modulo p en el rango [0, p-1] !!!!!!!!!!!!! por queeee ese rango
+        (int): inverso de n modulo p en el rango [0, p-1]
     """
     if p == 0: 
         raise ZeroDivisionError('No se puede dividir por 0. ')
-    if p <= 1:
-        raise e.NEError("NE")
-    mcd_n_p, x_o, y_0 = bezout(n, p)    # Hacemos bezout 
+    mcd_n_p, x_o, y_0 = bezout(n, abs(p))    # Hacemos bezout 
     if mcd_n_p != 1:                    # Por definición
         raise ValueError('NE')
     # x puede ser negativo por lo que normalizamos al representante en [0, p-1] 
-    # comoooo por queee
-    return mod(x_o, p)
+    return mod(x_o, abs(p))
 
 '-------------------------------------------------------------------------------------------------------------------------------------'
 
@@ -376,10 +373,8 @@ def mod(a:int, m:int) -> int:
         a (int): primer número
         m (int): segundo número
     Returns: 
-        (int): si m es > 0 devuelve el resto de la division entera
+        (int): devuelve el resto de la division entera
     """
-    if m <= 0:
-        raise ValueError("m debe ser > 0")
     return a % m
 
 def tcr_dos(r1:int, m1:int, r2:int, m2:int) -> tuple[int, int]:
