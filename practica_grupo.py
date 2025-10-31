@@ -66,7 +66,14 @@ print(f'\nHemos roto la clave RSA de la mesa A. Su d es {d_mesa_A}')
 import re
 n_X = 28282590191348679547
 e_X = 15780653617344828671
-phi_X = m.euler(n_X)
+
+# Inicialmente se quiso romper la clave empleando la funcion de euler con el código siguiente: 
+# phi_X = m.euler(n_X)
+# Sin embargo este código tardó algo de tiempo en ejecutarse, por lo que se decidió emplear otro enfoque utilizando el siguiente código: 
+p,q = m.factorizar_cripto(28282590191348679547)
+phi_X = (p-1)*(q-1)
+# Este este rompe la clave de X en cuestión de pocos segundos. 
+
 d_X = m.inversa_mod_p(e_X, phi_X)
 
 with open('criptograma_X.txt', 'r', encoding = 'utf-8') as f:
