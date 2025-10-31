@@ -269,6 +269,7 @@ def potencia_mod_p(base:int, exp:int, p:int) -> int:
     """
     if p == 0 or base == 0 and exp == 0: 
         raise ZeroDivisionError('No se puede dividir por 0 ni elevar a 0. ')
+    p = abs(p)
     if base < 0:                     # Actualizamos la base en el caso de que esta sea negativa
         base = p + base
     if exp < 0:                      # El exponente debe ser negativo, empleamos la fórmula b^e = b^(-1)*b^e
